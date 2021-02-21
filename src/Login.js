@@ -3,12 +3,14 @@ import { useState, useRef } from 'react';
 
 export function Login ({symbol, onClick}){
     return (
-        <form>
-            <div class="form-row">
-                <div class="col">
-                    <label for="inputUsername">Enter Username to Play!</label>
-                    <input type="text" class="form-control" placeholder="Username" name="username"/>
-                    <button type="submit" class="btn btn-primary" name="username_enter">Sign in</button>
+        <form className="form-group row">
+            
+            <div className="form-row mx-auto">
+                <div className="col-xs-4 center">
+                    <input type="text" class="form-control" placeholder="Enter Username" name="username"/>
+                </div>
+                <div className="input-group-append center">
+                    <button type="submit" class="btn btn-primary mb-4" name="username_enter">Sign in</button>
                 </div>
             </div> 
         </form>

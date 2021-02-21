@@ -7,6 +7,12 @@
   pointer-events: none;
 }
 
+.center{
+    text-align: center;
+    margin-right: auto;
+    margin-left: auto;
+}
+
 .board {
 	width: 300px; /* Total horizontal dimensions */
 	height: 300px; /* Total vertical dimensions */
