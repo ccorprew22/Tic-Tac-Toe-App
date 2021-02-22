@@ -12,6 +12,7 @@ import { Signup } from './Signup.js';
 
 function App() {
   return (
+    
     <div className="App">
       <h1 className="text-center">Tic Tac Toe</h1>
       <Login key={0}/>

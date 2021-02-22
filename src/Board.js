@@ -21,33 +21,27 @@ export function Board (symbol){
                                         ]);
                                         
     function check(old_board, squareId, symbol){
+        const lines = [
+                        [0, 1, 2],//top horizontal
+                        [3, 4, 5],//mid horizontal
+                        [6, 7, 8],//bottom horizontal
+                        [0, 3, 6],//left vert
+                        [1, 4, 7],//mid vert
+                        [2, 5, 8],//right vert
+                        [0, 4, 8],//left diagonal
+                        [2, 4, 6],//right diagonal
+                      ];
         var board = old_board;
         board[squareId] = {id: squareId, symbol: symbol};
         console.log(board);
-        if(board[0].symbol == board[3].symbol && board[0].symbol == board[6].symbol){//left vertical
-            if(board[0].symbol != "") //So that it won't count three consecutive blanks as a game over
-                return true;
-        }else if(board[1].symbol == board[4].symbol && board[1].symbol == board[7].symbol){//mid vertical
-            if(board[1].symbol != "")
-                return true;
-        }else if(board[2].symbol == board[5].symbol && board[2].symbol == board[8].symbol){//right vertical
-            if(board[2].symbol != "")
-                return true;
-        }else if(board[0].symbol == board[1].symbol && board[0].symbol == board[2].symbol){//top horizontal
-            if(board[0].symbol != "")
-                return true;
-        }else if(board[3].symbol == board[4].symbol && board[3].symbol == board[5].symbol){//mid horizontal
-            if(board[3].symbol != "")
-                return true;
-        }else if(board[6].symbol == board[7].symbol && board[6].symbol == board[8].symbol){//bottom horizontal
-            if(board[6].symbol != "")
-                return true;
-        }else if(board[0].symbol == board[4].symbol && board[0].symbol == board[8].symbol){//left diagonal
-            if(board[0].symbol != "")
-                return true;
-        }else if(board[2].symbol == board[4].symbol && board[2].symbol == board[6].symbol){//right horizontal
-            if(board[2].symbol != "")
-                return true;
+        for(var i=0; i<lines.length; i++){
+            var a = lines[i][0];
+            var b = lines[i][1];
+            var c = lines[i][2];
+            if(board[a].symbol == board[b].symbol && board[a].symbol == board[b].symbol){
+                if(board[0].symbol != "") //So that it won't count three consecutive blanks as a game over
+                    return true;
+            }
         }
         return false;
     }
@@ -76,14 +70,12 @@ export function Board (symbol){
             }
         }
     }
+ 
+  useEffect(() => {
+    socket.on('connect', (num) => {
+        console.log(num);
+    });
     
-    //console.log(board);
-  // The function inside useEffect is only run whenever any variable in the array
-  // (passed as the second arg to useEffect) changes. Since this array is empty
-  // here, then the function will only run once at the very beginning of mounting.
-  useEffect(() => { //Does changes that were done by other user
-    // Listening for a chat event emitted by the server. If received, we
-    // run the code in the function that is passed in as the second arg
     socket.on('choice', (data) => { //responds when 'choice' is emitted
       //console.log('Choice event received!');
       console.log(data);
