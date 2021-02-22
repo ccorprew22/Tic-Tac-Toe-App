@@ -36,7 +36,7 @@ def on_choice(data): # data is whatever arg you pass in your emit call on client
     #print(str(data))
     # This emits the 'choice' event from the server to all clients except for
     # the client that emmitted the event that triggered this function
-    socketio.emit('choice',  data, broadcast=True, include_self=True)
+    socketio.emit('choice',  data, broadcast=True, include_self=False)
 
 
 @socketio.on('player_joined') #When player active, name is added to player board
