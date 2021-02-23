@@ -16,6 +16,8 @@ socketio = SocketIO(
 
 global i
 i = 1
+global two_player
+two_player = []
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -24,10 +26,16 @@ def index(filename):
 
 # When a client connects from this Socket connection, this function is run
 @socketio.on('connect')
+
 def on_connect():
     global i
+    global two_player
+    if len(two_player) <= 6:
+        two_player.append(i)
+   # print(two_player)
     print("User " + str(i) + " connected!")
-    socketio.emit('connect', {'i':i}, broadcast=True, include_self=False)
+    #print(two_player)
+    socketio.emit('connect', {'list': two_player}, broadcast=True, include_self=False)
     i += 1
     
 # When a client disconnects from this Socket connection, this function is run

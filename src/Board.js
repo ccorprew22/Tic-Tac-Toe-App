@@ -8,6 +8,7 @@ const socket = io();
 export function Board (symbol){
     const inputRef = useRef(null);
     var winner = null;
+    var two_player = {'X': -1, 'O': -1};
     const [board, setBoard] = useState([
                                         {id: 0, symbol: ""},
                                         {id: 1, symbol: ""},
@@ -38,7 +39,7 @@ export function Board (symbol){
             var a = lines[i][0];
             var b = lines[i][1];
             var c = lines[i][2];
-            if(board[a].symbol == board[b].symbol && board[a].symbol == board[b].symbol){
+            if(board[a].symbol == board[b].symbol && board[a].symbol == board[c].symbol){
                 if(board[0].symbol != "") //So that it won't count three consecutive blanks as a game over
                     return true;
             }
@@ -72,8 +73,9 @@ export function Board (symbol){
     }
  
   useEffect(() => {
-    socket.on('connect', (num) => {
-        console.log(num);
+    socket.on('connect', (data) => {
+        console.log(data.list);
+        //Find out how to do session variable
     });
     
     socket.on('choice', (data) => { //responds when 'choice' is emitted
