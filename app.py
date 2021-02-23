@@ -46,17 +46,14 @@ def on_disconnect():
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
 def on_choice(data): # data is whatever arg you pass in your emit call on client
-    #print(str(data))
-    # This emits the 'choice' event from the server to all clients except for
-    # the client that emmitted the event that triggered this function
     socketio.emit('choice', data, broadcast=True, include_self=False)
-
 
 @socketio.on('player_joined') #When player active, name is added to player board
 def on_player_joined(data):
     print(str(data))
     socketio.emit('player_joined', data, broadcast=True, include_self=False)
     
+
 if __name__ == '__main__':
     socketio.run(
         app,
