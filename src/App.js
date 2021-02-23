@@ -2,13 +2,13 @@ import logo from './logo.svg';
 import './App.css';
 //import { ListItem } from './ListItem.js';
 import { useState, useRef, useEffect } from 'react';
-//import io from 'socket.io-client';
+import io from 'socket.io-client';
 import { Board } from './Board.js';
 import { Players } from './Players.js';
 import { Login } from './Login.js';
 import { Signup } from './Signup.js';
 
-//const socket = io(); // Connects to socket connection
+const socket = io(); // Connects to socket connection
 
 function App() {
   return (
@@ -36,3 +36,4 @@ function App() {
 }
 
 export default App;
+export {socket};

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Square } from './Square.js'
 import { useState, useRef, useEffect } from 'react';
-import io from 'socket.io-client';
+//import io from 'socket.io-client';
+import { socket } from './App.js';
+//const socket = io();
 
-const socket = io();
-
-export function Board (symbol){
+export function Board (){
     const inputRef = useRef(null);
     var winner = null;
-    var two_player = {'X': -1, 'O': -1};
+    var two_player = {X: -1, O: -1};
     const [board, setBoard] = useState([
                                         {id: 0, symbol: ""},
                                         {id: 1, symbol: ""},
@@ -57,7 +57,6 @@ export function Board (symbol){
                 symb = "X";
             }
             setBoard(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
-             //TRY RUNNING OUTSIDE OF useEffect
             var _check_ = check(board, squareId, symb);
             console.log(_check_);
             if(_check_ == true){
@@ -74,15 +73,23 @@ export function Board (symbol){
  
   useEffect(() => {
     socket.on('connect', (data) => {
-        console.log(data.list);
+        if(data != undefined){
+            console.log(data[0]);
+            console.log(data[1]);
+            if(data[0].includes(data[1]) && two_player.X == -1){
+                two_player.X = data[1];
+            }else if(data[0].includes(data[1]) && two_player.X != -1){
+                two_player.O = data[1];
+            }
+            console.log(two_player);
+        }
+        //console.log(data[1]);
         //Find out how to do session variable
     });
     
     socket.on('choice', (data) => { //responds when 'choice' is emitted
       //console.log('Choice event received!');
       console.log(data);
-      // If the server sends a message (on behalf of another client), then we
-      // add it to the list of messages to render it on the UI.
       setBoard(board.map((square) => square.id == data.squareId ? {...square, symbol: data.symb} : square));
       if(data.winner == true){
           console.log("You lost");

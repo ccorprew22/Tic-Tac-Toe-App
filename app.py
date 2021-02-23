@@ -26,16 +26,15 @@ def index(filename):
 
 # When a client connects from this Socket connection, this function is run
 @socketio.on('connect')
-
 def on_connect():
     global i
     global two_player
-    if len(two_player) <= 6:
+    if len(two_player) < 4:
         two_player.append(i)
-   # print(two_player)
+    print(two_player)
     print("User " + str(i) + " connected!")
     #print(two_player)
-    socketio.emit('connect', {'list': two_player}, broadcast=True, include_self=False)
+    socketio.emit('connect', [two_player, i], broadcast=True, include_self=True)
     i += 1
     
 # When a client disconnects from this Socket connection, this function is run
@@ -63,6 +62,6 @@ if __name__ == '__main__':
         app,
         host=os.getenv('IP', '0.0.0.0'),
         port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
-        debug=True,
+        debug=False,
         use_reloader=False
     )
