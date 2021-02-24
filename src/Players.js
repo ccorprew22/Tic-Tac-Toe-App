@@ -2,8 +2,7 @@ import React from 'react';
 import { ListItem } from './ListItem.js'
 import { useState, useRef, useEffect } from 'react';
 import io from 'socket.io-client';
-
-const socket = io();
+import {socket} from './App.js'
 
 export function Players (player){ //Online players list
     const inputRef = useRef(null);

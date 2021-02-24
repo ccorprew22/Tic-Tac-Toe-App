@@ -2,9 +2,9 @@ import React from 'react';
 import { Square } from './Square.js'
 import { useState, useRef, useEffect } from 'react';
 //import io from 'socket.io-client';
+//import { onClickSymbol } from './App.js';
 import { socket } from './App.js';
 //const socket = io();
-
 export function Board (){
     const inputRef = useRef(null);
     var winner = null;
