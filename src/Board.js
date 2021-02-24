@@ -4,12 +4,18 @@ import { useState, useRef, useEffect } from 'react';
 //import io from 'socket.io-client';
 //import { onClickSymbol } from './App.js';
 import { socket } from './App.js';
-//const socket = io();
+
+
 export function Board (){
+    
+    const sId = socket.id;
     const inputRef = useRef(null);
     var winner = null;
-    const [two_player, setPlayer] = useState({X: -1, O: -1});
-    const [turns, changeTurn] = useState({turn: 0});
+    const [two_player, setPlayer] = useState({X: "", O: ""});
+    const X = two_player.X;
+    const O = two_player.O;
+    //const [playerId, setId] = useState(0);//Dont send in socket
+    const [turns, changeTurn] = useState({turn: ""});
     const [board, setBoard] = useState([
                                         {id: 0, symbol: ""},
                                         {id: 1, symbol: ""},
@@ -49,14 +55,28 @@ export function Board (){
     }
     
     function onClickSymbol(squareId, symbol){
+        console.log(socket);
         var data_board = board;
-        if (inputRef != null){
+        var curr_turn = turns.turn;
+        console.log("Player ID: " + sId);
+        console.log("Current Turn: " + curr_turn);
+        if (inputRef != null && symbol == ""){//Check to see if square is taken
             console.log(squareId);
             var symb = "";
-            if(symbol == "X" ){
-                symb = "O";
-            }else if(symbol == "O" || symbol == ""){
-                symb = "X";
+            if(curr_turn == sId){
+                if(two_player.X == sId){
+                    symb = "X";
+                    console.log("X MOVED");
+                    changeTurn(prevTurn => {
+                        return {...prevTurn, turn: two_player.O}
+                    });
+                }else if(two_player.O == sId){
+                    symb = "O";
+                    console.log("O MOVED");
+                    changeTurn(prevTurn => { //EMIT CHANGE TO OTHERS
+                        return {...prevTurn, turn: two_player.X}
+                    });
+                }
             }
             var i = 0;
             setBoard(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
@@ -74,26 +94,35 @@ export function Board (){
             }
         }
     }
- 
-  useEffect(() => {
-    socket.on('connect', (data) => {
-        if(data != undefined && data[0].length % 2 == 0 && two_player.O == -1){
-            console.log(data[0]);
-            console.log(data[1]);
-            if(data[0][1] == data[1] && two_player.X == -1){
+  socket.on('connect', (data) => {
+        console.log(data);
+        //console.log(socket);
+        
+        if(data != undefined){
+            if(data.length == 2){
                 setPlayer(prevPlayer => {
-                    return {X : data[1], O : -1};
+                    return {...prevPlayer, X: data[0], O: data[1]}
                 });
-                //two_player.X = data[0][1];
-            }else if(data[0][3] == data[1] && two_player.X != -1 && data[1] > two_player.X){
-                setPlayer(prevPlayer => {
-                    return { X: data[0][1], O : data[0][3]};
+                changeTurn(prevTurn => {
+                    return {...prevTurn, turn: data[0]}
                 });
             }
+            
         }
-        console.log(two_player);
+            
+            // if(data[0][0] == data[1] && two_player.length == 0){
+                
+            //     //two_player.X = data[0][1];
+            // }else if(data[0][1] == data[1] && two_player.length == 1){
+            //     setPlayer(prevPlayer => {
+            //         return {...prevPlayer, O: data[1]}
+            //     });
+            // }
+    
+        //console.log(two_player);
         //Find out how to do session variable
     });
+  useEffect(() => {
     
     socket.on('choice', (data) => { //responds when 'choice' is emitted
       //console.log('Choice event received!');
@@ -108,27 +137,31 @@ export function Board (){
               i++;
           }
       }));
-      /*
-      changeTurn(prevTurn => {
-        if(turns.turn == 0){
-            return { turn : 1 };
-        }else{
-            return { turn : 0 };
-        }
-      });
-      */
+      
+    //   changeTurn(prevTurn => {
+    //     if(prevTurn == 0){
+    //         return prevTurn + 1 ;
+    //     }else{
+    //         return prevTurn - 1;
+    //     }
+    //   });
       if(data.winner == true){
           console.log("You lost");
       }
     });
+    
   }, [board]); //put board so that it will save the changes and not reset the board after choice
+  
   console.log(two_player);
     return (
-        <div className="board">
-                {board.map((square, index) =>
-                    //<div className="box" onClick={() => onClickSymbol(square.id)}>{square.symbol}</div>
-                    <Square key={index} symbol={square.symbol} onClick={() => onClickSymbol(square.id, square.symbol)}/>
-                )}
-        </div>
+    <div className="board">
+            {board.map((square, index) =>
+                //<div className="box" onClick={() => onClickSymbol(square.id)}>{square.symbol}</div>
+                <Square key={index} symbol={square.symbol} onClick={() => onClickSymbol(square.id, square.symbol)}/>
+            )}
+            <p>{sId}</p>
+            
+            
+    </div>
     );
 }
