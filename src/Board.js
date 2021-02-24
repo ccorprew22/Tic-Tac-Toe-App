@@ -70,12 +70,14 @@ export function Board (){
                     changeTurn(prevTurn => {
                         return {...prevTurn, turn: two_player.O}
                     });
+                    socket.emit('turn', {turn: two_player.O});
                 }else if(two_player.O == sId){
                     symb = "O";
                     console.log("O MOVED");
                     changeTurn(prevTurn => { //EMIT CHANGE TO OTHERS
                         return {...prevTurn, turn: two_player.X}
                     });
+                    socket.emit('turn', {turn: two_player.X});
                 }
             }
             var i = 0;
@@ -94,7 +96,7 @@ export function Board (){
             }
         }
     }
-  socket.on('connect', (data) => {
+    socket.on('connect', (data) => {
         console.log(data);
         //console.log(socket);
         
@@ -109,18 +111,15 @@ export function Board (){
             }
             
         }
-            
-            // if(data[0][0] == data[1] && two_player.length == 0){
-                
-            //     //two_player.X = data[0][1];
-            // }else if(data[0][1] == data[1] && two_player.length == 1){
-            //     setPlayer(prevPlayer => {
-            //         return {...prevPlayer, O: data[1]}
-            //     });
-            // }
+    });
     
-        //console.log(two_player);
-        //Find out how to do session variable
+    socket.on('turn', (data) => {
+        console.log(data);
+        if(data != undefined){
+            changeTurn(prevTurn => {
+                return {...prevTurn, turn: data.turn}
+            });
+        }
     });
   useEffect(() => {
     
@@ -137,14 +136,6 @@ export function Board (){
               i++;
           }
       }));
-      
-    //   changeTurn(prevTurn => {
-    //     if(prevTurn == 0){
-    //         return prevTurn + 1 ;
-    //     }else{
-    //         return prevTurn - 1;
-    //     }
-    //   });
       if(data.winner == true){
           console.log("You lost");
       }
