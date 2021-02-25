@@ -35,7 +35,12 @@ def on_connect():
     print("User " + str(i) + " connected!")
     socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     i += 1
-    
+
+@socketio.on('player_joined')
+def on_player_joined(data):
+    print(data)
+    socketio.emit('player_joined', data, broadcast=True, include_self=True)
+  
 # When a client disconnects from this Socket connection, this function is run
 @socketio.on('disconnect')
 def on_disconnect():
@@ -53,7 +58,7 @@ def on_choice(data): # data is whatever arg you pass in your emit call on client
 def on_player_joined(data):
     print(str(data))
     socketio.emit('turn', data, broadcast=True, include_self=True)
-    
+   
 @socketio.on('game_over')
 def on_game_over(data):
     socketio.emit('game_over', data, broadcast=True, include_self=True)
