@@ -33,8 +33,6 @@ def on_connect():
     player_lst.append(sid)
     print(player_lst)
     print("User " + str(i) + " connected!")
-    #print(request.sid)
-    #print(two_player)
     socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     i += 1
     
@@ -45,7 +43,7 @@ def on_disconnect():
     #send data on disconnect to remove player from list 
     print('User disconnected!')
 
-# When a client emits the event 'choice' to the server, this function is run
+
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
 def on_choice(data): # data is whatever arg you pass in your emit call on client
@@ -54,8 +52,11 @@ def on_choice(data): # data is whatever arg you pass in your emit call on client
 @socketio.on('turn') #When player active, name is added to player board
 def on_player_joined(data):
     print(str(data))
-    socketio.emit('turn', data, broadcast=True, include_self=False)
+    socketio.emit('turn', data, broadcast=True, include_self=True)
     
+@socketio.on('game_over')
+def on_game_over(data):
+    socketio.emit('game_over', data, broadcast=True, include_self=True)
 
 if __name__ == '__main__':
     socketio.run(
