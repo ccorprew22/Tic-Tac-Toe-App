@@ -17,11 +17,13 @@ socketio = SocketIO(
 global i
 i = 1
 global player_lst
-player_lst = []
+player_lst = ["Waiting for player", "Waiting for player"]
 global num_players
 num_players = 0
 global two_player
 two_player = ["", ""]
+global sid_lst
+sid_lst = []
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -32,28 +34,11 @@ def index(filename):
 @socketio.on('connect')
 def on_connect():
     global i
-    global player_lst
     sid = request.sid #socket id
-    player_lst.append(sid)
-    print(player_lst)
     print("User " + str(i) + " connected!")
     socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     i += 1
 
-@socketio.on('player_joined')
-def on_player_joined(data):
-    global num_players
-    global two_player
-    num_players += 1
-    data['num_players'] = num_players
-    if two_player[0] == "":
-        two_player[0] = data['sid']
-    elif two_player[1] == "":
-        two_player[1] = data['sid'] 
-    data['two_players'] = two_player  
-    print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True)
-  
 # When a client disconnects from this Socket connection, this function is run
 @socketio.on('disconnect')
 def on_disconnect():
@@ -61,19 +46,50 @@ def on_disconnect():
     #send data on disconnect to remove player from list 
     print('User disconnected!')
 
+#Removes log in div
+@socketio.on('remove_login')
+def on_remove_login(data):
+    socketio.emit("remove_login", data, broadcast=True, include_self=True)
 
+#When player logs in with username
+@socketio.on('player_joined') #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
+def on_player_joined(data):
+    global num_players
+    global two_player
+    global player_lst
+    if player_lst[0] == "Waiting for player": #did this for display.js after removing login
+        player_lst[0] = data['username']
+    elif player_lst[1] == "Waiting for player":
+        player_lst[1] = data['username']
+    else: #after first two players are found
+        player_lst.append(data['username'])
+    print(player_lst)
+    num_players += 1
+    data['num_players'] = num_players
+    if two_player[0] == "":
+        two_player[0] = data['sid']
+    elif two_player[1] == "":
+        two_player[1] = data['sid'] 
+    data['two_players'] = two_player #Player list
+    data['players'] = player_lst #Overall user list
+    print(data)
+    socketio.emit('player_joined', data, broadcast=True, include_self=True)
+ 
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
 def on_choice(data): # data is whatever arg you pass in your emit call on client
     socketio.emit('choice', data, broadcast=True, include_self=False)
 
-@socketio.on('turn') #When player active, name is added to player board
-def on_player_joined(data):
+ #When player makes turn change
+@socketio.on('turn')
+def on_turn(data):
     print(str(data))
     socketio.emit('turn', data, broadcast=True, include_self=True)
    
 @socketio.on('game_over')
 def on_game_over(data):
+    champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
+    data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
 
 if __name__ == '__main__':

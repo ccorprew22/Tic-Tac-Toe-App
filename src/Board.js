@@ -86,7 +86,6 @@ export function Board (){
                     socket.emit('turn', {turn: two_player.X});
                 }
             }
-            //var i = 0;
             setBoard(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
             var _check_ = check(board, squareId, symb);
             console.log(_check_);
@@ -122,12 +121,12 @@ export function Board (){
         }
     });
     
-    socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [] }
+    socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
         console.log("player joined")
         if(data != undefined){
-            console.log(player_lst);
-            console.log(data.two_player);
-            console.log(socket.id);
+            //console.log(player_lst);
+            //console.log(data.two_player);
+            //console.log(socket.id);
             addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
             if(data.num_players == 1){
                 console.log("X Player");
@@ -136,6 +135,7 @@ export function Board (){
                 });
                 
             }else if(data.num_players == 2){
+                console.log("O Player");
                 setPlayer(prevPlayer => {
                     return {...prevPlayer, X: data.two_players[0], O: data.two_players[1]};
                 });
@@ -152,11 +152,6 @@ export function Board (){
             }else{
             	console.log("Not you");
             }
-            
-               //setPlayer(prevPlayer => {
-                    //return {...prevPlayer};
-                //});
-            //}
         }
     });
   useEffect(() => {
@@ -187,13 +182,10 @@ export function Board (){
   //console.log(two_player);
     return (
     <div className="board">
-            {board.map((square, index) =>
-                //<div className="box" onClick={() => onClickSymbol(square.id)}>{square.symbol}</div>
-                <Square key={index} symbol={square.symbol} onClick={() => onClickSymbol(square.id, square.symbol)}/>
-            )}
-            <p>{socket.id}</p>
-            
-            
+        {board.map((square, index) =>
+            //<div className="box" onClick={() => onClickSymbol(square.id)}>{square.symbol}</div>
+            <Square key={index} symbol={square.symbol} onClick={() => onClickSymbol(square.id, square.symbol)}/>
+        )}
     </div>
     );
 }

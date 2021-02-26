@@ -9,11 +9,11 @@ export function Login ({symbol, onClick}){
     
     function inputUsername(){
         if (inputRef != null) {
-            
             const username = inputRef.current.value;
             addPlayer(prevPlayers => [...prevPlayers, {sId : socket.id, username : username}]);
-            //console.log(l);
+            socket.emit('remove_login', {sid : socket.id})
             socket.emit('player_joined', { sid: socket.id, username : username });
+            
         }
     }
     
@@ -24,21 +24,7 @@ export function Login ({symbol, onClick}){
             addPlayer(prevPlayer => [...prevPlayer, {sId : data.sid, username : data.username}]);
         }
     });
-    //socket.on('connect', (data) => {
-        //console.log(data);
-        
-        //console.log(socket);
-        // if(data != undefined){
-        //     if(data.length == 2){
-        //         setPlayer(prevPlayer => {
-        //             return {...prevPlayer, X: data[0], O: data[1]}
-        //         });
-        //         changeTurn(prevTurn => {
-        //             return {...prevTurn, turn: data[0]} //setting first player id for X turn
-        //         });
-        //     }
-        // }
-    //});
+    
     
     return (
         <div className="form-group row">
