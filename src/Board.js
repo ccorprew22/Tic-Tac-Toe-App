@@ -12,6 +12,7 @@ export function Board (){
     const [two_player, setPlayer] = useState({X: "", O: ""});
     const X = two_player.X;
     const O = two_player.O;
+    const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     //const [playerId, setId] = useState(0);//Dont send in socket
     const [turns, changeTurn] = useState({turn: ""});
     const [board, setBoard] = useState([
@@ -64,9 +65,10 @@ export function Board (){
         var curr_turn = turns.turn;
         //console.log("Player ID: " + sId);
         console.log("Current Turn: " + curr_turn);
-        if (inputRef != null && symbol == "" && winner == null){//Check to see if square is taken
+        if (inputRef != null && symbol == "" && result == null){//Check to see if square is taken
             console.log(squareId);
             var symb = "";
+            console.log(turns);
             if(curr_turn == sId){
                 if(two_player.X == sId){
                     symb = "X";
@@ -84,7 +86,7 @@ export function Board (){
                     socket.emit('turn', {turn: two_player.X});
                 }
             }
-            var i = 0;
+            //var i = 0;
             setBoard(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
             var _check_ = check(board, squareId, symb);
             console.log(_check_);
@@ -109,22 +111,7 @@ export function Board (){
         }
     }
     //socket.off('MY_EVENT').on('MY_EVENT', () => doThisOnlyOnce());
-    socket.on('connect', (data) => {
-        console.log(data);
-        
-        //console.log(socket);
-        if(data != undefined){
-            if(data.length == 2){
-                setPlayer(prevPlayer => {
-                    return {...prevPlayer, X: data[0], O: data[1]}
-                });
-                changeTurn(prevTurn => {
-                    return {...prevTurn, turn: data[0]}
-                });
-            }
-            
-        }
-    });
+    
     
     socket.off('turn').on('turn', (data) => {
         console.log(data);
@@ -135,6 +122,43 @@ export function Board (){
         }
     });
     
+    socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [] }
+        console.log("player joined")
+        if(data != undefined){
+            console.log(player_lst);
+            console.log(data.two_player);
+            console.log(socket.id);
+            addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
+            if(data.num_players == 1){
+                console.log("X Player");
+                setPlayer(prevPlayer => {
+                    return {...prevPlayer, X: data.two_players[0]};
+                });
+                
+            }else if(data.num_players == 2){
+                setPlayer(prevPlayer => {
+                    return {...prevPlayer, X: data.two_players[0], O: data.two_players[1]};
+                });
+                changeTurn(prevTurn => { //setting first player id for X turn
+                    return {...prevTurn, turn: data.two_players[0]};
+                });
+            }else if(data.num_players > 2){
+                console.log("spectator");
+                console.log("turn: " + turns.turn);
+            }
+             
+            if(socket.id == data.sid) {
+            	console.log(data.username + ' joined');
+            }else{
+            	console.log("Not you");
+            }
+            
+               //setPlayer(prevPlayer => {
+                    //return {...prevPlayer};
+                //});
+            //}
+        }
+    });
   useEffect(() => {
     
     socket.on('choice', (data) => { //responds when 'choice' is emitted
@@ -150,6 +174,9 @@ export function Board (){
               i++;
           }
       }));
+      if(data.winner != null){
+          setResult(prevResult => prevResult = data.winner);
+      }
       if(data.winner == true){
           console.log("You lost");
       }
@@ -164,7 +191,7 @@ export function Board (){
                 //<div className="box" onClick={() => onClickSymbol(square.id)}>{square.symbol}</div>
                 <Square key={index} symbol={square.symbol} onClick={() => onClickSymbol(square.id, square.symbol)}/>
             )}
-            <p>{sId}</p>
+            <p>{socket.id}</p>
             
             
     </div>

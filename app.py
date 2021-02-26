@@ -18,6 +18,10 @@ global i
 i = 1
 global player_lst
 player_lst = []
+global num_players
+num_players = 0
+global two_player
+two_player = ["", ""]
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -38,6 +42,15 @@ def on_connect():
 
 @socketio.on('player_joined')
 def on_player_joined(data):
+    global num_players
+    global two_player
+    num_players += 1
+    data['num_players'] = num_players
+    if two_player[0] == "":
+        two_player[0] = data['sid']
+    elif two_player[1] == "":
+        two_player[1] = data['sid'] 
+    data['two_players'] = two_player  
     print(data)
     socketio.emit('player_joined', data, broadcast=True, include_self=True)
   
