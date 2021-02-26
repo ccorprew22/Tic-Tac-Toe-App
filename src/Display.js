@@ -12,7 +12,7 @@ export function Display(player){
     const [result, setResult] = useState("");
     const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     //var display;
-    var display = <h1 className="text-center">X: {playerX} vs O: {playerO}</h1>;
+    var display = <h1 className="text-center display">X: {playerX} vs O: {playerO}</h1>;
     
     socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
         if(data != undefined){
@@ -34,7 +34,7 @@ export function Display(player){
             }else{
                 winner = playerO;
             }
-            setResult(prevResult => prevResult = "Winner: " + winner); //Game over
+            setResult(prevResult => prevResult = "Winner : " + winner); //Game over
         }else{
             setResult(prevResult => prevResult = "Draw"); //Draw
         }
@@ -52,13 +52,13 @@ export function Display(player){
     });
     
     if(result.length > 0){
-        display = <div className="mx-auto"><h1 className="text-center">{result}</h1> <Replay key={11}/></div>;
+        display = <div className=""><h1 className="text-center display">{result}</h1><Replay className="text-center" key={11}/></div>;
     }else if(result.length == 0){
         //socket.emit("restart")
-        display = <h1 className="text-center">X: {playerX} vs O: {playerO}</h1>
+        display = <h1 className="text-center display">X: {playerX} vs O: {playerO}</h1>
     }
     return (
-        <div className="row justify-content-center">
+        <div className="mx-auto">
             {display}
         </div>
     

@@ -11,7 +11,7 @@ import { Display } from './Display.js';
 const socket = io(); // Connects to socket connection
 
 function App() {
-  const [display, changeDisplay] = useState(<Login key={0}/>);
+  const [display, changeDisplay] = useState(<div><Login key={0}/><h1 className="text-center chalk-font">Welcome! Log in to join in on the action!</h1></div>);
   
   socket.off('remove_login').on('remove_login', (data) => {//{ sid: socket.id }
       if(data != undefined){
@@ -40,7 +40,7 @@ function App() {
   
   return (
     <div className="App">
-      <h1 className="text-center">Tic Tac Toe</h1>
+      <h1 className="text-center title chalk-font">Tic Tac Toe</h1>
       {display}
     </div>
   );

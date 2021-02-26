@@ -5,32 +5,24 @@ import io from 'socket.io-client';
 import {socket} from './App.js'
 
 export function Players (player){ //Online players list
-    const inputRef = useRef(null);
-    const [players, setPlayer] = useState([]);
-
-    function onClickPlayer(squareId, symbol){
-        if (inputRef != null){
-            console.log(squareId);
-            var symb = "";
-            if(symbol == "X" ){
-                symb = "O";
-            }else if(symbol == "O" || symbol == ""){
-                symb = "X";
-            }
-            //setPlayer(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
-            //socket.emit('choice', {squareId: squareId, symb: symb }); // emits event
+    const [player_lst, addPlayer] = useState([]);
+    
+    socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
+        if(data != undefined){
+            //console.log(data);
+            //console.log(player_lst.length);
+            addPlayer(prevPlayer => prevPlayer = data.players);
         }
-
-    }
-
+    });
+    
     return (
         <div className="card">
             <div className="card-header">
-                Featured
+                Player Lobby
             </div>
             <ul className="list-group list-group-flush">
-                {players.map((name, id) =>
-                    <ListItem name={player.name}/>
+                {player_lst.map((name, index) =>
+                    <ListItem name={name} key={index} title={index}/>
                 )}
             </ul>
         </div>

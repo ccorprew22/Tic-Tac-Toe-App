@@ -9,6 +9,6 @@ export function Replay(){
     
 
     return (
-        <button className="btn btn-primary mb-4" onClick={replayRequest}>Replay</button>
+        <button className="btn mb-4 text-center" onClick={replayRequest}>Replay</button>
     );
 }
