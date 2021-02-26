@@ -7,7 +7,6 @@ import { Board } from './Board.js';
 import { Players } from './Players.js';
 import { Login } from './Login.js';
 import { Signup } from './Signup.js';
-import { Versus } from './Versus.js';
 import { Display } from './Display.js';
 const socket = io(); // Connects to socket connection
 

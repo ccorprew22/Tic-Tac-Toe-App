@@ -15,6 +15,7 @@ export function Board (){
     const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     //const [playerId, setId] = useState(0);//Dont send in socket
     const [turns, changeTurn] = useState({turn: ""});
+    const [restart, setRestart] = useState("");
     const [board, setBoard] = useState([
                                         {id: 0, symbol: ""},
                                         {id: 1, symbol: ""},
@@ -48,7 +49,7 @@ export function Board (){
             if(board[a].symbol == board[b].symbol && board[a].symbol == board[c].symbol){
                 if(board[a].symbol != "" || board[b].symbol != "" || board[c].symbol != "") //So that it won't count three consecutive blanks as a game over
                     return true;
-            }////CHECK IF BOARD IS FULL!!!
+            }
         }
         if(board.some(square => square.symbol == '')) { //Checks if board is full
             return null;
@@ -56,15 +57,14 @@ export function Board (){
             console.log("Draw");
             return false;
         }
-        //return null;
     }
-    
     function onClickSymbol(squareId, symbol){
         //console.log(socket);
         var data_board = board;
         var curr_turn = turns.turn;
         //console.log("Player ID: " + sId);
         console.log("Current Turn: " + curr_turn);
+        
         if (inputRef != null && symbol == "" && result == null){//Check to see if square is taken
             console.log(squareId);
             var symb = "";
@@ -74,7 +74,7 @@ export function Board (){
                     symb = "X";
                     console.log("X MOVED");
                     changeTurn(prevTurn => {
-                        return {...prevTurn, turn: two_player.O}
+                        return {...prevTurn, turn: two_player.O};
                     });
                     socket.emit('turn', {turn: two_player.O});
                 }else if(two_player.O == sId){
@@ -102,18 +102,16 @@ export function Board (){
             }
             data_board.map((square) => square.id == squareId ? square.symbol = symb : square); //board for emit
             socket.emit('choice', {board: data_board, winner: winner}); // emits event, sending entire board and winner
-            console.log({squareId: squareId, symb: symb, winner: winner })
-            if(winner == true){
-                console.log("You win!");
-            }
+            //console.log({squareId: squareId, symb: symb, winner: winner })
+            // if(winner == true){
+            //     console.log("You win!");
+            // }
             
         }
     }
     //socket.off('MY_EVENT').on('MY_EVENT', () => doThisOnlyOnce());
-    
-    
     socket.off('turn').on('turn', (data) => {
-        console.log(data);
+        //console.log(data);
         if(data != undefined){
             changeTurn(prevTurn => {
                 return {...prevTurn, turn: data.turn}
@@ -122,20 +120,16 @@ export function Board (){
     });
     
     socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
-        console.log("player joined")
+        //console.log("player joined")
         if(data != undefined){
-            //console.log(player_lst);
-            //console.log(data.two_player);
-            //console.log(socket.id);
             addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
             if(data.num_players == 1){
-                console.log("X Player");
+                //console.log("X Player");
                 setPlayer(prevPlayer => {
                     return {...prevPlayer, X: data.two_players[0]};
                 });
-                
             }else if(data.num_players == 2){
-                console.log("O Player");
+                //console.log("O Player");
                 setPlayer(prevPlayer => {
                     return {...prevPlayer, X: data.two_players[0], O: data.two_players[1]};
                 });
@@ -143,38 +137,46 @@ export function Board (){
                     return {...prevTurn, turn: data.two_players[0]};
                 });
             }else if(data.num_players > 2){
-                console.log("spectator");
-                console.log("turn: " + turns.turn);
+                //console.log("spectator");
+                //console.log("turn: " + turns.turn);
             }
              
             if(socket.id == data.sid) {
-            	console.log(data.username + ' joined');
+            	//console.log(data.username + ' joined');
             }else{
-            	console.log("Not you");
+            	//console.log("Not you");
             }
         }
     });
-  useEffect(() => {
     
-    socket.on('choice', (data) => { //responds when 'choice' is emitted
-      //console.log('Choice event received!');
-      //console.log(data);
-      var new_board = data.board;
-      //console.log(new_board[0].symbol);
-      var i = 0;
-      setBoard(board.map((square) => {
-          if(square.id == new_board[i].id){
-              return {...square, symbol: new_board[i++].symbol};
-          }else{
-              i++;
+    socket.on('replay', (data) => {
+        if(data != undefined){
+            //console.log(data);
+            if(data[0] == true){
+                setBoard(board.map((square) => square = {id: square.id, symbol : "" }));
+                setResult(prevResult => prevResult = null);
+            }
+        } 
+    });
+    
+    useEffect(() => {
+        socket.off('choice').on('choice', (data) => { //responds when 'choice' is emitted
+          var new_board = data.board;
+          //console.log(new_board[0].symbol);
+          var i = 0;
+          setBoard(board.map((square) => {
+              if(square.id == new_board[i].id){
+                  return {...square, symbol: new_board[i++].symbol};
+              }else{
+                  i++;
+              }
+          }));
+          if(data.winner != null){
+              setResult(prevResult => prevResult = data.winner);
           }
-      }));
-      if(data.winner != null){
-          setResult(prevResult => prevResult = data.winner);
-      }
-      if(data.winner == true){
-          console.log("You lost");
-      }
+          if(data.winner == true){
+              //console.log("You lost");
+          }
     });
     
   }, [board]); //put board so that it will save the changes and not reset the board after choice

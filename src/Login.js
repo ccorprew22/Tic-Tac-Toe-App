@@ -19,8 +19,8 @@ export function Login ({symbol, onClick}){
     
     socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players }
         if(data != undefined){
-            console.log(data);
-            console.log(player_lst.length);
+            //console.log(data);
+            //console.log(player_lst.length);
             addPlayer(prevPlayer => [...prevPlayer, {sId : data.sid, username : data.username}]);
         }
     });

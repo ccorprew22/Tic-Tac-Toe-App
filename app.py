@@ -24,6 +24,8 @@ global two_player
 two_player = ["", ""]
 global sid_lst
 sid_lst = []
+global replay_lst
+replay_lst = []
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -91,6 +93,20 @@ def on_game_over(data):
     champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
     data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
+
+#Replay
+@socketio.on("replay")
+def on_replay(data): #socket.id
+    global replay_lst
+    if data['sid'] == two_player[0] and data['sid'] not in replay_lst:
+        replay_lst.append(data['sid'])
+    elif data['sid'] == two_player[1] and data['sid'] not in replay_lst:
+        replay_lst.append(data['sid'])
+    
+    if len(replay_lst) == 2:
+        data = [True, len(replay_lst)]
+        replay_lst = []
+    socketio.emit("replay", data, broadcast=True, include_self=True)
 
 if __name__ == '__main__':
     socketio.run(
