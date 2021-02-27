@@ -21,7 +21,7 @@
 
 ## Known problems and how I would address them in the future. 
 1. For some reason, if you try to log it, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
-2. The program sometimes takes 20+ seconds to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. I would address this somehow contacting the server once a player leaves or increase the frequency when it checks for any disconnections.
+2. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. I would address this somehow contacting the server once a player leaves or increase the frequency when it checks for any disconnections.
 3. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
 
 ## Technical issues and how you solved it (your process, what you searched, what resources you used)

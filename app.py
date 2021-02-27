@@ -11,7 +11,8 @@ socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     json=json,
-    manage_session=False
+    manage_session=False,
+    ping_interval = 1
 )
 
 global num_players
