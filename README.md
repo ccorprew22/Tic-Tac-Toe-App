@@ -20,7 +20,8 @@
 4. If one of the two players log out, the game will end, leaving an opportunity for one of the specatators to enter the empty spot.
 
 ## Known problems and how I would address them in the future. 
-1. After a handful of games the game becomes laggy and performace begins to dwindle. 
+1. For some reason, if you try to log it, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
+2. After a handful of games the game becomes laggy and performace begins to dwindle. 
 2. The program sometimes takes 20+ seconds to notice that a player has disconnected, which can leave the other players waiting in a state of limbo. I would address this somehow contacting the server once a player leaves or increase the frequency when it checks for any disconnections.
 3. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
 
