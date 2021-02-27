@@ -1,7 +1,7 @@
 import React from 'react';
 import { socket } from './App.js';
 
-export function Replay(){
+export function Replay({name}){
 
     function replayRequest(){
         socket.emit("replay", {sid : socket.id});
@@ -9,6 +9,6 @@ export function Replay(){
     
 
     return (
-        <button className="btn mb-4 text-center" onClick={replayRequest}>Replay</button>
+        <button className="btn mb-4 text-center" onClick={replayRequest}>{name}</button>
     );
 }

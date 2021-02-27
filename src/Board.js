@@ -12,10 +12,10 @@ export function Board (){
     const [two_player, setPlayer] = useState({X: "", O: ""});
     const X = two_player.X;
     const O = two_player.O;
-    const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
+    //const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     //const [playerId, setId] = useState(0);//Dont send in socket
     const [turns, changeTurn] = useState({turn: ""});
-    const [restart, setRestart] = useState("");
+    //const [restart, setRestart] = useState("");
     const [board, setBoard] = useState([
                                         {id: 0, symbol: ""},
                                         {id: 1, symbol: ""},
@@ -81,7 +81,7 @@ export function Board (){
                     symb = "O";
                     console.log("O MOVED");
                     changeTurn(prevTurn => { //EMIT CHANGE TO OTHERS
-                        return {...prevTurn, turn: two_player.X}
+                        return {...prevTurn, turn: two_player.X};
                     });
                     socket.emit('turn', {turn: two_player.X});
                 }
@@ -119,10 +119,10 @@ export function Board (){
         }
     });
     
-    socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
+    socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}] }
         //console.log("player joined")
         if(data != undefined){
-            addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
+            //addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
             if(data.num_players == 1){
                 //console.log("X Player");
                 setPlayer(prevPlayer => {
@@ -149,14 +149,20 @@ export function Board (){
         }
     });
     
-    socket.on('replay', (data) => {
+    socket.on('replay', (data) => {//[True, len(replay_lst), two_player, , overall_lst]
         if(data != undefined){
             //console.log(data);
             if(data[0] == true){
                 setBoard(board.map((square) => square = {id: square.id, symbol : "" }));
                 setResult(prevResult => prevResult = null);
+                setPlayer(prevPlayers => prevPlayers = {X: data[2][0], O: data[2][1]});
+                changeTurn(prevTurn => prevTurn = {turn: data[2][0]});
             }
         } 
+    });
+    
+    socket.on('disconnect' , (data) => {
+        
     });
     
     useEffect(() => {

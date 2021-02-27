@@ -2,28 +2,20 @@ import React from 'react';
 import { useState, useRef } from 'react';
 import { socket } from './App.js';
 export function Login ({symbol, onClick}){
-    const sId = socket.id;
+    //const sId = socket.id;
     //console.log("Sid: " + sId);
     const inputRef = useRef(null); // Reference to <input> element
-    const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
+    //const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     
     function inputUsername(){
         if (inputRef != null) {
             const username = inputRef.current.value;
-            addPlayer(prevPlayers => [...prevPlayers, {sId : socket.id, username : username}]);
+            //addPlayer(prevPlayers => [...prevPlayers, {sId : socket.id, username : username}]);
             socket.emit('remove_login', {sid : socket.id})
             socket.emit('player_joined', { sid: socket.id, username : username });
             
         }
     }
-    
-    socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players }
-        if(data != undefined){
-            //console.log(data);
-            //console.log(player_lst.length);
-            addPlayer(prevPlayer => [...prevPlayer, {sId : data.sid, username : data.username}]);
-        }
-    });
     
     
     return (

@@ -14,16 +14,12 @@ socketio = SocketIO(
     manage_session=False
 )
 
-global i
-i = 1
-global player_lst
-player_lst = ["Waiting for player", "Waiting for player"]
 global num_players
 num_players = 0
 global two_player
 two_player = ["", ""]
-global sid_lst
-sid_lst = []
+global overall_lst
+overall_lst = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
 global replay_lst
 replay_lst = []
 
@@ -35,19 +31,30 @@ def index(filename):
 # When a client connects from this Socket connection, this function is run
 @socketio.on('connect')
 def on_connect():
-    global i
     sid = request.sid #socket id
-    print("User " + str(i) + " connected!")
-    socketio.emit('connect', player_lst, broadcast=True, include_self=True)
-    i += 1
+    print("User connected! " + request.sid)
+    #socketio.emit('connect', player_lst, broadcast=True, include_self=True)
+    
 
 # When a client disconnects from this Socket connection, this function is run
 @socketio.on('disconnect')
 def on_disconnect():
-    global player_lst
-    #send data on disconnect to remove player from list 
-    print('User disconnected!')
-
+    global overall_lst
+    global two_player
+    for i in range(len(overall_lst)):
+        if type(overall_lst[i]) is str:
+            continue
+        elif overall_lst[i]['sid'] == request.sid:
+            overall_lst[i] = "Disconnected Player"
+            break
+    if request.sid in two_player:
+        index = two_player.index(request.sid)
+        two_player[index] = "Disconnected Player"
+    #send data on disconnect to remove player from list
+    message = {'player_lst': overall_lst, 'player_left': request.sid}
+    print('User disconnected! : ' + request.sid)
+    socketio.emit('disconnect', message, broadcast=True, include_self=True)
+    
 #Removes log in div
 @socketio.on('remove_login')
 def on_remove_login(data):
@@ -58,24 +65,29 @@ def on_remove_login(data):
 def on_player_joined(data):
     global num_players
     global two_player
-    global player_lst
-    if player_lst[0] == "Waiting for player": #did this for display.js after removing login
-        player_lst[0] = data['username']
-    elif player_lst[1] == "Waiting for player":
-        player_lst[1] = data['username']
+    global overall_lst
+    if overall_lst[0] == "Waiting for player": #did this for display.js after removing login
+        overall_lst[0] = {'sid' : data['sid'], 'username' : data['username']}
+    elif overall_lst[1] == "Waiting for player":
+        overall_lst[1] = {'sid' : data['sid'], 'username' : data['username']}
     else: #after first two players are found
-        player_lst.append(data['username'])
-    print(player_lst)
+        overall_lst.append({'sid' : data['sid'], 'username' : data['username']})
+    #print(player_lst)
+    #overall_lst.append({'sid' : data['sid'], 'username' : data['username']})
     num_players += 1
     data['num_players'] = num_players
     if two_player[0] == "":
         two_player[0] = data['sid']
     elif two_player[1] == "":
         two_player[1] = data['sid'] 
+    late_join = True #Game in session
+    if "Disconnected Player" in two_player:
+        late_join = False #Looking for new player
     data['two_players'] = two_player #Player list
-    data['players'] = player_lst #Overall user list
+    data['players'] = overall_lst #Overall list usernames {sid: sid, username: username}
+    data['late_join'] = late_join
     print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True)
+    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}] }
  
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
@@ -98,13 +110,17 @@ def on_game_over(data):
 @socketio.on("replay")
 def on_replay(data): #socket.id
     global replay_lst
-    if data['sid'] == two_player[0] and data['sid'] not in replay_lst:
-        replay_lst.append(data['sid'])
-    elif data['sid'] == two_player[1] and data['sid'] not in replay_lst:
+    
+    if "Disconnected Player" in two_player: #to fill open spot
+        if data['sid'] not in two_player:
+            index = two_player.index("Disconnected Player")
+            two_player[index] = data['sid']
+            replay_lst.append(data['sid'])
+    if data['sid'] in two_player and data['sid'] not in replay_lst:
         replay_lst.append(data['sid'])
     
     if len(replay_lst) == 2:
-        data = [True, len(replay_lst)]
+        data = [True, len(replay_lst), two_player, overall_lst]
         replay_lst = []
     socketio.emit("replay", data, broadcast=True, include_self=True)
 
