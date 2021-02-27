@@ -68,7 +68,7 @@ export function Display(player){
             }else{
                 winner = playerO;
             }
-            setResult(prevResult => prevResult = "Winner : " + winner); //Game over
+            setResult(prevResult => prevResult = "Winner : " + winner[1]); //Game over
         }else{
             setResult(prevResult => prevResult = "Draw"); //Draw
         }
