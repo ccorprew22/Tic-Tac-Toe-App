@@ -18,6 +18,7 @@
 2. If you are one of the first two people to log in, you will play Tic Tac Toe with a live audience.
 3. After a winner or a draw is decided, both players have to hit the replay button to clear the board and restart.
 4. If one of the two players log out, the game will end, leaving an opportunity for one of the specatators to enter the empty spot.
+5. Once a player has disconnected, for some time, the game will ask for players to hit the "New Player Game" button, where if one player is still active, a specatator will also have to hit the button. The first one to hit it will fill the empty spot. If there are no active players, two specatators will have to hit the button.
 
 ## Known problems and how I would address them in the future. 
 1. For some reason, if you try to log it, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
