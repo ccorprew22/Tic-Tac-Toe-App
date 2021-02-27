@@ -21,11 +21,10 @@
 
 ## Known problems and how I would address them in the future. 
 1. For some reason, if you try to log it, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
-2. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. I would address this somehow contacting the server once a player leaves or increase the frequency when it checks for any disconnections.
+2. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. 
 3. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
 
 ## Technical issues and how you solved it (your process, what you searched, what resources you used)
 1. I had an issue where the sockets would fire several times, which made the console messy and slowed the performance of the app. So I used `socket.off('MY_EVENT', doThisOnlyOnce).on('MY_EVENT', doThisOnlyOnce);` to make certain sockets send one time. (https://dev.to/bravemaster619/how-to-prevent-multiple-socket-connections-and-events-in-react-531d)
 2. Disconnecting players broke the application when deployed on to Heroku because many players were left with an inaccessible board until the server would reset on its own. I fixed this by creating a sequence of socket emits and functions that would give existing players an option to fill in the empty spots.
-
-
+3. Even though it is still a problem of taking too long, before the time to notice that a player disconnected was 20+ seconds. I dramatically shortened this time by adding a ping interval of 1 second. It still takes 5+ seconds but that is more reasonable. (https://flask-socketio.readthedocs.io/en/latest/)
