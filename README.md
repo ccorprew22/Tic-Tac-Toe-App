@@ -21,9 +21,10 @@
 5. Once a player has disconnected, for some time, the game will ask for players to hit the "New Player Game" button, where if one player is still active, a specatator will also have to hit the button. The first one to hit it will fill the empty spot. If there are no active players, two specatators will have to hit the button.
 
 ## Known problems and how I would address them in the future. 
-1. For some reason, if you try to log it, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
-2. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. 
-3. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
+1. For some reason, if you try to log in, the app will automatically disconnect you. I have only experienced this after quickly logging in right after opening the app. My guess is that the app is still processing the newly connected user, and needs at least 2-3 seconds to work properly.
+2. Similarly to the first problem, if you try to log in too quickly you may not make it to the tic tac toe board without trying again or refreshing. 
+3. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. 
+4. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
 
 ## Technical issues and how you solved it (your process, what you searched, what resources you used)
 1. I had an issue where the sockets would fire several times, which made the console messy and slowed the performance of the app. So I used `socket.off('MY_EVENT', doThisOnlyOnce).on('MY_EVENT', doThisOnlyOnce);` to make certain sockets send one time. (https://dev.to/bravemaster619/how-to-prevent-multiple-socket-connections-and-events-in-react-531d)
