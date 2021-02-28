@@ -25,6 +25,7 @@
 2. Similarly to the first problem, if you try to log in too quickly you may not make it to the tic tac toe board without trying again or refreshing. 
 3. The program sometimes takes a while to notice that a player has disconnected, which causes MOST of the problems that you may experience. USUALLY if things start acting weird due to a player disconnecting, waiting for the program to notice a disconnection will fix everything and put everyone back on the same page. 
 4. When players leave, the list will remove the disconnected player, but will leave an empty space where their name once was. I plan on fixing this by changing how the server processes disconnected players.
+5. If a player joins in the middle of a game, the board will update for them after the next move made. I plan to send newly joined players the active board when connecting in the future.
 
 ## Technical issues and how you solved it (your process, what you searched, what resources you used)
 1. I had an issue where the sockets would fire several times, which made the console messy and slowed the performance of the app. So I used `socket.off('MY_EVENT', doThisOnlyOnce).on('MY_EVENT', doThisOnlyOnce);` to make certain sockets send one time. (https://dev.to/bravemaster619/how-to-prevent-multiple-socket-connections-and-events-in-react-531d)
