@@ -8,25 +8,17 @@ export function Players (player){ //Online players list
     const [player_lst, addPlayer] = useState([]);
     const [two_player, setPlayer] = useState();
     
-    socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, username: username}] }
+    socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, username: username}], display_lst: display_lst }
         if(data != undefined){
             //console.log(data);
             //console.log(player_lst.length);
-            addPlayer(prevPlayer => prevPlayer = data.players); //playerlst
+            addPlayer(prevPlayer => prevPlayer = data.display_lst); //playerlst
             setPlayer(prevPlayer => prevPlayer = data.two_players); //two players
         }
     });
-    socket.on('disconnect', (data) => { //{'player_lst': player_lst, 'player_left': request.sid}
+    socket.on('disconnect', (data) => { //{'player_lst': overall_lst, 'player_left': request.sid, 'display_lst' : display_lst}
         if(data != undefined){
-            var test_lst = [];
-            for(var i = 0; i<data.player_lst.length; i++){
-                if(data.player_lst[i] !== ""){
-                    test_lst.push(data.player_lst[i]);
-                }
-            }
-            console.log(test_lst)
-            addPlayer(player => player = test_lst);
-            
+            addPlayer(player => player = data.display_lst);
         }
     });
 

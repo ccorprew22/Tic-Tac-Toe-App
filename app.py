@@ -23,6 +23,8 @@ global overall_lst
 overall_lst = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
 global replay_lst
 replay_lst = []
+global display_lst #Temporary solution for problem involving empty spots on player list after disconnect, current problem is handling changing list length
+display_lst = []
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -42,17 +44,23 @@ def on_connect():
 def on_disconnect():
     global overall_lst
     global two_player
+    global display_lst
+    removed_user = ""
     for i in range(len(overall_lst)):
         if type(overall_lst[i]) is str:
             continue
         elif overall_lst[i]['sid'] == request.sid:
+            removed_user = overall_lst[i]
             overall_lst[i] = "Disconnected Player"
             break
     if request.sid in two_player:
         index = two_player.index(request.sid)
         two_player[index] = "Disconnected Player"
+    
+    if removed_user in display_lst:
+        display_lst.remove(removed_user)
     #send data on disconnect to remove player from list
-    message = {'player_lst': overall_lst, 'player_left': request.sid}
+    message = {'player_lst': overall_lst, 'player_left': request.sid, 'display_lst' : display_lst}
     print('User disconnected! : ' + request.sid)
     socketio.emit('disconnect', message, broadcast=True, include_self=True)
     
@@ -67,6 +75,7 @@ def on_player_joined(data):
     global num_players
     global two_player
     global overall_lst
+    global display_lst
     if overall_lst[0] == "Waiting for player": #did this for display.js after removing login
         overall_lst[0] = {'sid' : data['sid'], 'username' : data['username']}
     elif overall_lst[1] == "Waiting for player":
@@ -84,11 +93,13 @@ def on_player_joined(data):
     late_join = True #Game in session
     if "Disconnected Player" in two_player:
         late_join = False #Looking for new player
+    display_lst.append({'sid' : data['sid'], 'username' : data['username']})
     data['two_players'] = two_player #Player list
     data['players'] = overall_lst #Overall list usernames {sid: sid, username: username}
     data['late_join'] = late_join
+    data['display_lst'] = display_lst
     print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}] }
+    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst }
  
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
