@@ -97,7 +97,7 @@ export function Board (){
             }else if(_check_ == false){//Draw if board is full
                 winner = false;
                 setResult(prevResult => prevResult = false);
-                socket.emit("game_over", {winner: winner, X: two_player.X, O: two_player.O});
+                socket.emit("game_over", {winner: winner, X: two_player.X, O: two_player.O, champ: null});
                 console.log("Game over");
             }
             data_board.map((square) => square.id == squareId ? square.symbol = symb : square); //board for emit

@@ -2,8 +2,23 @@ import os
 from flask import Flask, send_from_directory, json, session, request
 from flask_socketio import SocketIO
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv()) # This is to load your env variables from .env
 
 app = Flask(__name__, static_folder='./build/static')
+
+# Point SQLAlchemy to your Heroku database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# Gets rid of a warning
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+# IMPORTANT: This must be AFTER creating db variable to prevent
+# circular import issues
+import Players
+db.create_all()
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -76,6 +91,13 @@ def on_player_joined(data):
     global two_player
     global overall_lst
     global display_lst
+    #database check
+    player_user = Players.Player.query.filter_by(username='username').scalar()
+    if player_user == None:
+        new_user = Players.Player(username=data['username'], score=100)
+        db.session.add(new_user)
+        db.session.commit()
+        
     if overall_lst[0] == "Waiting for player": #did this for display.js after removing login
         overall_lst[0] = {'sid' : data['sid'], 'username' : data['username']}
     elif overall_lst[1] == "Waiting for player":
@@ -113,7 +135,24 @@ def on_turn(data):
     socketio.emit('turn', data, broadcast=True, include_self=True)
    
 @socketio.on('game_over')
-def on_game_over(data):
+def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
+    
+    if data['champ'] == data['X']:
+        playerWinner = Players.Player.query.filter_by(username=data['X']).first()
+        playerLoser = Players.Player.query.filter_by(username=data['O']).first()
+        winnerScore = playerWinner.score
+        loserScore = playerLoser.score
+        playerLoser = loserScore + 1
+        playerWinner.score = winnerScore + 1
+    elif data['champ'] == data['O']:
+        playerWinner = Players.Player.query.filter_by(username=data['O']).first()
+        playerLoser = Players.Player.query.filter_by(username=data['X']).first()
+        winnerScore = playerWinner.score
+        loserScore = playerLoser.score
+        playerLoser = loserScore + 1
+        playerWinner.score = winnerScore + 1
+    leaderboard= Players.Player.query.all()
+    print(leaderboard)
     champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
     data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
