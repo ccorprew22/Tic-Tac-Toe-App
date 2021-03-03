@@ -92,7 +92,8 @@ def on_player_joined(data):
     global overall_lst
     global display_lst
     #database check
-    player_user = Players.Player.query.filter_by(username='username').scalar()
+    #bool(session.query(Players.Player).filter_by(username='username').first())
+    player_user = Players.Player.query.filter_by(username=data['username']).scalar()
     if player_user == None:
         new_user = Players.Player(username=data['username'], score=100)
         db.session.add(new_user)
@@ -136,23 +137,33 @@ def on_turn(data):
    
 @socketio.on('game_over')
 def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
-    
+    global overall_lst
+    #using display_lst is faster than looping through player list
     if data['champ'] == data['X']:
-        playerWinner = Players.Player.query.filter_by(username=data['X']).first()
-        playerLoser = Players.Player.query.filter_by(username=data['O']).first()
+        print("GAME OVER!!!")
+        X = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['X']) else False, overall_lst))
+        O = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['O']) else False, overall_lst))
+        playerWinner = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        playerWinner.score += 1
+        db.session.commit()
+        playerLoser = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        playerLoser.score -= 1
+        db.session.commit()
+        #print(playerWinner)
         winnerScore = playerWinner.score
-        loserScore = playerLoser.score
-        playerLoser = loserScore + 1
-        playerWinner.score = winnerScore + 1
+        #loserScore = playerLoser.score
+        print(winnerScore)
+        
     elif data['champ'] == data['O']:
-        playerWinner = Players.Player.query.filter_by(username=data['O']).first()
-        playerLoser = Players.Player.query.filter_by(username=data['X']).first()
-        winnerScore = playerWinner.score
-        loserScore = playerLoser.score
-        playerLoser = loserScore + 1
-        playerWinner.score = winnerScore + 1
-    leaderboard= Players.Player.query.all()
-    print(leaderboard)
+        playerWinner = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        playerWinner.score += 1
+        db.session.commit()
+        playerLoser = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        playerLoser.score -= 1
+        db.session.commit()
+        
+    #leaderboard= Players.Player.query.all()
+    #print(leaderboard)
     champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
     data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
