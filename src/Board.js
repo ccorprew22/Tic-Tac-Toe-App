@@ -10,8 +10,8 @@ export function Board (){
     const inputRef = useRef(null);
     const [result, setResult] = useState(null);
     const [two_player, setPlayer] = useState({X: "", O: ""});
-    const X = two_player.X;
-    const O = two_player.O;
+    //const X = two_player.X;
+    //const O = two_player.O;
     //const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     //const [playerId, setId] = useState(0);//Dont send in socket
     const [turns, changeTurn] = useState({turn: ""});
@@ -46,12 +46,12 @@ export function Board (){
             var a = lines[i][0];
             var b = lines[i][1];
             var c = lines[i][2];
-            if(board[a].symbol == board[b].symbol && board[a].symbol == board[c].symbol){
-                if(board[a].symbol != "" || board[b].symbol != "" || board[c].symbol != "") //So that it won't count three consecutive blanks as a game over
+            if(board[a].symbol === board[b].symbol && board[a].symbol === board[c].symbol){
+                if(board[a].symbol !== "" || board[b].symbol !== "" || board[c].symbol !== "") //So that it won't count three consecutive blanks as a game over
                     return true;
             }
         }
-        if(board.some(square => square.symbol == '')) { //Checks if board is full
+        if(board.some(square => square.symbol === '')) { //Checks if board is full
             return null;
         }else{
             console.log("Draw");
@@ -65,19 +65,19 @@ export function Board (){
         //console.log("Player ID: " + sId);
         console.log("Current Turn: " + curr_turn);
         
-        if (inputRef != null && symbol == "" && result == null){//Check to see if square is taken
+        if (inputRef != null && symbol === "" && result == null){//Check to see if square is taken
             console.log(squareId);
             var symb = "";
             console.log(turns);
-            if(curr_turn == sId){
-                if(two_player.X == sId){
+            if(curr_turn === sId){
+                if(two_player.X === sId){
                     symb = "X";
                     console.log("X MOVED");
                     changeTurn(prevTurn => {
                         return {...prevTurn, turn: two_player.O};
                     });
                     socket.emit('turn', {turn: two_player.O});
-                }else if(two_player.O == sId){
+                }else if(two_player.O === sId){
                     symb = "O";
                     console.log("O MOVED");
                     changeTurn(prevTurn => { //EMIT CHANGE TO OTHERS
@@ -86,21 +86,21 @@ export function Board (){
                     socket.emit('turn', {turn: two_player.X});
                 }
             }
-            setBoard(board.map((square) => square.id == squareId ? {...square, symbol: symb} : square));
+            setBoard(board.map((square) => square.id === squareId ? {...square, symbol: symb} : square));
             var _check_ = check(board, squareId, symb);
             console.log(_check_);
-            if(_check_ == true){
+            if(_check_ === true){
                 winner = true;
                 setResult(prevResult => prevResult = true);
                 socket.emit('game_over', {winner: winner, X: two_player.X, O: two_player.O, champ: sId});
                 console.log("Game over");
-            }else if(_check_ == false){//Draw if board is full
+            }else if(_check_ === false){//Draw if board is full
                 winner = false;
                 setResult(prevResult => prevResult = false);
                 socket.emit("game_over", {winner: winner, X: two_player.X, O: two_player.O});
                 console.log("Game over");
             }
-            data_board.map((square) => square.id == squareId ? square.symbol = symb : square); //board for emit
+            data_board.map((square) => square.id === squareId ? square.symbol = symb : square); //board for emit
             socket.emit('choice', {board: data_board, winner: winner}); // emits event, sending entire board and winner
             //console.log({squareId: squareId, symb: symb, winner: winner })
             // if(winner == true){
@@ -112,23 +112,23 @@ export function Board (){
     //socket.off('MY_EVENT').on('MY_EVENT', () => doThisOnlyOnce());
     socket.off('turn').on('turn', (data) => {
         //console.log(data);
-        if(data != undefined){
+        if(data !== undefined){
             changeTurn(prevTurn => {
-                return {...prevTurn, turn: data.turn}
+                return {...prevTurn, turn: data.turn};
             });
         }
     });
     
     socket.on('player_joined', (data) => { //{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}] }
         //console.log("player joined")
-        if(data != undefined){
+        if(data !== undefined){
             //addPlayer(prevPlayer => [...prevPlayer, {sid : data.sid, username : data.username}]);
-            if(data.num_players == 1){
+            if(data.num_players === 1){
                 //console.log("X Player");
                 setPlayer(prevPlayer => {
                     return {...prevPlayer, X: data.two_players[0]};
                 });
-            }else if(data.num_players == 2){
+            }else if(data.num_players === 2){
                 //console.log("O Player");
                 setPlayer(prevPlayer => {
                     return {...prevPlayer, X: data.two_players[0], O: data.two_players[1]};
@@ -141,7 +141,7 @@ export function Board (){
                 //console.log("turn: " + turns.turn);
             }
              
-            if(socket.id == data.sid) {
+            if(socket.id === data.sid) {
             	//console.log(data.username + ' joined');
             }else{
             	//console.log("Not you");
@@ -150,9 +150,9 @@ export function Board (){
     });
     
     socket.on('replay', (data) => {//[True, len(replay_lst), two_player, , overall_lst]
-        if(data != undefined){
+        if(data !== undefined){
             //console.log(data);
-            if(data[0] == true){
+            if(data[0] === true){
                 setBoard(board.map((square) => square = {id: square.id, symbol : "" }));
                 setResult(prevResult => prevResult = null);
                 setPlayer(prevPlayers => prevPlayers = {X: data[2][0], O: data[2][1]});
@@ -171,16 +171,17 @@ export function Board (){
           //console.log(new_board[0].symbol);
           var i = 0;
           setBoard(board.map((square) => {
-              if(square.id == new_board[i].id){
+              if(square.id === new_board[i].id){
                   return {...square, symbol: new_board[i++].symbol};
               }else{
                   i++;
               }
+              
           }));
           if(data.winner != null){
               setResult(prevResult => prevResult = data.winner);
           }
-          if(data.winner == true){
+          if(data.winner === true){
               //console.log("You lost");
           }
     });
