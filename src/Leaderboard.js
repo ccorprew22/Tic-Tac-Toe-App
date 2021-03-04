@@ -11,7 +11,7 @@ export function Leaderboard(player){
     function showLeaderboard() {
         if(boardOn == "off"){
             setOn(prevOn => prevOn = "on");
-            setDisplay(prevDisplay => prevDisplay = <table className="table">
+            setDisplay(prevDisplay => prevDisplay = <table className="table table-bordered table-dark table-hover">
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
@@ -49,7 +49,7 @@ export function Leaderboard(player){
         if(data != undefined){
             setLeader(prevLeader => prevLeader = data.leaderboard); //leaderboard
             if(boardOn == "on"){ //updates board if showing on screen
-                setDisplay(prevDisplay => prevDisplay = <table className="table">
+                setDisplay(prevDisplay => prevDisplay = <table className="table table-hover table-dark table-bordered">
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
@@ -71,8 +71,8 @@ export function Leaderboard(player){
         }
     });
     return(
-        <div className="card">
-            <button className="btn btn-primary mb-4" onClick={showLeaderboard}>Show Leaderboard</button>
+        <div className="card mx-auto border-0">
+            <button className="btn mb-4" onClick={showLeaderboard}>Show Leaderboard</button>
             {leaderboardDisplay}
         
         </div>
