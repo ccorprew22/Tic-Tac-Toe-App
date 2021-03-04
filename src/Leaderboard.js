@@ -2,12 +2,15 @@ import React from 'react';
 //import { ListItem } from './ListItem.js'
 import { useState, useRef, useEffect } from 'react';
 import io from 'socket.io-client';
+import { Username } from './Username.js';
 import {socket} from './App.js';
 
 export function Leaderboard(player){
     const [leaderboard, setLeader] = useState([]);
     const [leaderboardDisplay, setDisplay] = useState(<div></div>);
     const [boardOn, setOn] = useState("off");
+    const [loggedUser, setUser] = useState();
+    
     function showLeaderboard() {
         if(boardOn == "off"){
             setOn(prevOn => prevOn = "on");
@@ -21,11 +24,7 @@ export function Leaderboard(player){
                                     </thead>
                                     <tbody>
                                     {leaderboard.map((player, index) =>
-                                        <tr>
-                                            <th scope="row">{index+1}</th>
-                                            <td>{player.username}</td>
-                                            <td>{player.score}</td>
-                                        </tr>
+                                        <Username username={player.username} score={player.score} userLogged={loggedUser.username} index={index+1}/>
                                     )}
                                     </tbody>
                                 </table>);
@@ -41,6 +40,9 @@ export function Leaderboard(player){
             //console.log(player_lst.length);
             if(data != undefined){
                 setLeader(prevLeader => prevLeader = data.leaderboard); //leaderboard
+                if(socket.id === data['sid']){
+                    setUser(prevUser => prevUser = {sid: socket.id, username : data['username']});
+                }
             }
             
     });
