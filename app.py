@@ -40,6 +40,8 @@ global replay_lst
 replay_lst = []
 global display_lst #Temporary solution for problem involving empty spots on player list after disconnect, current problem is handling changing list length
 display_lst = []
+#global leaderboard
+#leaderboard = []
 
 @app.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
@@ -117,12 +119,19 @@ def on_player_joined(data):
     if "Disconnected Player" in two_player:
         late_join = False #Looking for new player
     display_lst.append({'sid' : data['sid'], 'username' : data['username']})
+    #leaderboard
+    all_rankings = Players.Player.query.order_by(Players.Player.score.desc()).all()
+    leaderboard = [] #{'username': username, 'score' : score}
+    for player in all_rankings:
+        leaderboard.append({'username' : player.username, 'score': player.score})
+    
     data['two_players'] = two_player #Player list
     data['players'] = overall_lst #Overall list usernames {sid: sid, username: username}
     data['late_join'] = late_join
     data['display_lst'] = display_lst
+    data['leaderboard'] = leaderboard
     print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst }
+    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
  
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')

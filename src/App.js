@@ -8,6 +8,7 @@ import { Players } from './Players.js';
 import { Login } from './Login.js';
 import { Signup } from './Signup.js';
 import { Display } from './Display.js';
+import { Leaderboard } from './Leaderboard.js';
 const socket = io(); // Connects to socket connection
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         </div>
       </div>
     </div>
+    <Leaderboard key={10}/>
     </div>);
           }
       }
