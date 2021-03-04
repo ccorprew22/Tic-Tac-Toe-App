@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory, json, session, request
+from flask import Flask, send_from_directory, json, request
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -27,19 +27,19 @@ socketio = SocketIO(
     cors_allowed_origins="*",
     json=json,
     manage_session=False,
-    ping_interval = 1
+    ping_interval=1
 )
 
-global num_players
-num_players = 0
-global two_player
-two_player = ["", ""]
-global overall_lst
-overall_lst = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
-global replay_lst
-replay_lst = []
-global display_lst #Temporary solution for problem involving empty spots on player list after disconnect, current problem is handling changing list length
-display_lst = []
+global NUM_PLAYERS
+NUM_PLAYERS = 0
+global TWO_PLAYER
+TWO_PLAYER = ["", ""]
+global OVERALL_LST
+OVERALL_LST = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
+global REPLAY_LST
+REPLAY_LST = []
+global DISPLAY_LST #Temporary solution for problem involving empty spots on player list after disconnect, current problem is handling changing list length
+DISPLAY_LST = []
 #global leaderboard
 #leaderboard = []
 
@@ -55,29 +55,27 @@ def on_connect():
     print("User connected! " + request.sid)
     #socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     
-
 # When a client disconnects from this Socket connection, this function is run
 @socketio.on('disconnect')
 def on_disconnect():
-    global overall_lst
-    global two_player
-    global display_lst
+    global OVERALL_LST
+    global TWO_PLAYER
+    global DISPLAY_LST
     removed_user = ""
-    for i in range(len(overall_lst)):
-        if type(overall_lst[i]) is str:
+    for i in range(len(OVERALL_LST)):
+        if type(OVERALL_LST[i]) is str:
             continue
-        elif overall_lst[i]['sid'] == request.sid:
-            removed_user = overall_lst[i]
-            overall_lst[i] = "Disconnected Player"
+        elif OVERALL_LST[i]['sid'] == request.sid:
+            removed_user = OVERALL_LST[i]
+            OVERALL_LST[i] = "Disconnected Player"
             break
-    if request.sid in two_player:
-        index = two_player.index(request.sid)
-        two_player[index] = "Disconnected Player"
-    
-    if removed_user in display_lst:
-        display_lst.remove(removed_user)
+    if request.sid in TWO_PLAYER:
+        index = TWO_PLAYER.index(request.sid)
+        TWO_PLAYER[index] = "Disconnected Player"
+    if removed_user in DISPLAY_LST:
+        DISPLAY_LST.remove(removed_user)
     #send data on disconnect to remove player from list
-    message = {'player_lst': overall_lst, 'player_left': request.sid, 'display_lst' : display_lst}
+    message = {'player_lst': OVERALL_LST, 'player_left': request.sid, 'display_lst' : DISPLAY_LST}
     print('User disconnected! : ' + request.sid)
     socketio.emit('disconnect', message, broadcast=True, include_self=True)
     
@@ -89,10 +87,10 @@ def on_remove_login(data):
 #When player logs in with username
 @socketio.on('player_joined') #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
 def on_player_joined(data):
-    global num_players
-    global two_player
-    global overall_lst
-    global display_lst
+    global NUM_PLAYERS
+    global TWO_PLAYER
+    global OVERALL_LST
+    global DISPLAY_LST
     #database check
     #bool(session.query(Players.Player).filter_by(username='username').first())
     player_user = Players.Player.query.filter_by(username=data['username']).scalar()
@@ -101,34 +99,34 @@ def on_player_joined(data):
         db.session.add(new_user)
         db.session.commit()
         
-    if overall_lst[0] == "Waiting for player": #did this for display.js after removing login
-        overall_lst[0] = {'sid' : data['sid'], 'username' : data['username']}
-    elif overall_lst[1] == "Waiting for player":
-        overall_lst[1] = {'sid' : data['sid'], 'username' : data['username']}
+    if OVERALL_LST[0] == "Waiting for player": #did this for display.js after removing login
+        OVERALL_LST[0] = {'sid' : data['sid'], 'username' : data['username']}
+    elif OVERALL_LST[1] == "Waiting for player":
+        OVERALL_LST[1] = {'sid' : data['sid'], 'username' : data['username']}
     else: #after first two players are found
-        overall_lst.append({'sid' : data['sid'], 'username' : data['username']})
+        OVERALL_LST.append({'sid' : data['sid'], 'username' : data['username']})
     #print(player_lst)
     #overall_lst.append({'sid' : data['sid'], 'username' : data['username']})
-    num_players += 1
-    data['num_players'] = num_players
-    if two_player[0] == "":
-        two_player[0] = data['sid']
-    elif two_player[1] == "":
-        two_player[1] = data['sid'] 
+    NUM_PLAYERS += 1
+    data['num_players'] = NUM_PLAYERS
+    if TWO_PLAYER[0] == "":
+        TWO_PLAYER[0] = data['sid']
+    elif TWO_PLAYER[1] == "":
+        TWO_PLAYER[1] = data['sid'] 
     late_join = True #Game in session
-    if "Disconnected Player" in two_player:
+    if "Disconnected Player" in TWO_PLAYER:
         late_join = False #Looking for new player
-    display_lst.append({'sid' : data['sid'], 'username' : data['username']})
+    DISPLAY_LST.append({'sid' : data['sid'], 'username' : data['username']})
     #leaderboard
     all_rankings = Players.Player.query.order_by(Players.Player.score.desc()).all()
     leaderboard = [] #{'username': username, 'score' : score}
     for player in all_rankings:
         leaderboard.append({'username' : player.username, 'score': player.score})
     
-    data['two_players'] = two_player #Player list
-    data['players'] = overall_lst #Overall list usernames {sid: sid, username: username}
+    data['two_players'] = TWO_PLAYER #Player list
+    data['players'] = OVERALL_LST #Overall list usernames {sid: sid, username: username}
     data['late_join'] = late_join
-    data['display_lst'] = display_lst
+    data['display_lst'] = DISPLAY_LST
     data['leaderboard'] = leaderboard
     print(data)
     socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
@@ -146,29 +144,29 @@ def on_turn(data):
    
 @socketio.on('game_over')
 def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
-    global overall_lst
+    global OVERALL_LST
     #using display_lst is faster than looping through player list
     if data['champ'] == data['X']:
         print("GAME OVER!!!")
-        X = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['X']) else False, overall_lst))
-        O = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['O']) else False, overall_lst))
-        playerWinner = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
-        playerWinner.score += 1
+        X = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['X']) else False, OVERALL_LST))
+        O = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['O']) else False, OVERALL_LST))
+        player_winner = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        player_winner.score += 1
         db.session.commit()
-        playerLoser = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
-        playerLoser.score -= 1
+        player_loser = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        player_loser.score -= 1
         db.session.commit()
         #print(playerWinner)
-        winnerScore = playerWinner.score
+        winner_score = player_winner.score
         #loserScore = playerLoser.score
-        print(winnerScore)
+        print(winner_score)
         
     elif data['champ'] == data['O']:
-        playerWinner = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
-        playerWinner.score += 1
+        player_winner = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        player_winner.score += 1
         db.session.commit()
-        playerLoser = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
-        playerLoser.score -= 1
+        player_loser = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        player_loser.score -= 1
         db.session.commit()
     #sending updated leaderboard
     all_rankings = Players.Player.query.order_by(Players.Player.score.desc()).all()
@@ -176,26 +174,26 @@ def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, cham
     for player in all_rankings:
         leaderboard.append({'username' : player.username, 'score': player.score})
     data['leaderboard'] = leaderboard
-    champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
+    champ_user = [{'sid' : data['X'], 'user' : TWO_PLAYER[0]}, {'sid' : data['O'], 'user': TWO_PLAYER[1]}]
     data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
 
 #Replay
 @socketio.on("replay")
 def on_replay(data): #socket.id
-    global replay_lst
+    global REPLAY_LST
+    global TWO_PLAYER
+    if "Disconnected Player" in TWO_PLAYER: #to fill open spot
+        if data['sid'] not in TWO_PLAYER:
+            index = TWO_PLAYER.index("Disconnected Player")
+            TWO_PLAYER[index] = data['sid']
+            REPLAY_LST.append(data['sid'])
+    if data['sid'] in TWO_PLAYER and data['sid'] not in REPLAY_LST:
+        REPLAY_LST.append(data['sid'])
     
-    if "Disconnected Player" in two_player: #to fill open spot
-        if data['sid'] not in two_player:
-            index = two_player.index("Disconnected Player")
-            two_player[index] = data['sid']
-            replay_lst.append(data['sid'])
-    if data['sid'] in two_player and data['sid'] not in replay_lst:
-        replay_lst.append(data['sid'])
-    
-    if len(replay_lst) == 2:
-        data = [True, len(replay_lst), two_player, overall_lst]
-        replay_lst = []
+    if len(REPLAY_LST) == 2:
+        data = [True, len(REPLAY_LST), TWO_PLAYER, OVERALL_LST]
+        REPLAY_LST = []
     socketio.emit("replay", data, broadcast=True, include_self=True)
 
 if __name__ == '__main__':
