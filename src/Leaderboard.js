@@ -61,11 +61,7 @@ export function Leaderboard(player){
                                     </thead>
                                     <tbody>
                                     {data.leaderboard.map((player, index) =>
-                                        <tr>
-                                            <th scope="row">{index+1}</th>
-                                            <td>{player.username}</td>
-                                            <td>{player.score}</td>
-                                        </tr>
+                                        <Username username={player.username} score={player.score} userLogged={loggedUser.username} index={index+1}/>
                                     )}
                                     </tbody>
                                 </table>);
