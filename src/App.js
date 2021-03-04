@@ -34,7 +34,7 @@ function App() {
         </div>
       </div>
     </div>
-    <Leaderboard key={10}/>
+    <Leaderboard key={5}/>
     </div>);
           }
       }

@@ -6,29 +6,74 @@ import {socket} from './App.js';
 
 export function Leaderboard(player){
     const [leaderboard, setLeader] = useState([]);
+    const [leaderboardDisplay, setDisplay] = useState(<div></div>);
+    const [boardOn, setOn] = useState("off");
+    function showLeaderboard() {
+        if(boardOn == "off"){
+            setOn(prevOn => prevOn = "on");
+            setDisplay(prevDisplay => prevDisplay = <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Username</th>
+                                            <th scope="col">Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {leaderboard.map((player, index) =>
+                                        <tr>
+                                            <th scope="row">{index+1}</th>
+                                            <td>{player.username}</td>
+                                            <td>{player.score}</td>
+                                        </tr>
+                                    )}
+                                    </tbody>
+                                </table>);
+            
+        }else if(boardOn == "on"){
+            setOn(prevOn => prevOn = "off");
+            setDisplay(prevDisplay => prevDisplay = <div></div>);
+        }
+        console.log("here");
+    }
     socket.on('player_joined', (data) => {//{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
             //console.log(data);
             //console.log(player_lst.length);
+            if(data != undefined){
+                setLeader(prevLeader => prevLeader = data.leaderboard); //leaderboard
+            }
+            
+    });
+    
+    socket.on('game_over', (data) => {
+        if(data != undefined){
             setLeader(prevLeader => prevLeader = data.leaderboard); //leaderboard
+            if(boardOn == "on"){ //updates board if showing on screen
+                setDisplay(prevDisplay => prevDisplay = <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Username</th>
+                                            <th scope="col">Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {data.leaderboard.map((player, index) =>
+                                        <tr>
+                                            <th scope="row">{index+1}</th>
+                                            <td>{player.username}</td>
+                                            <td>{player.score}</td>
+                                        </tr>
+                                    )}
+                                    </tbody>
+                                </table>);
+            }
+        }
     });
     return(
         <div className="card">
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Username</th>
-                        <th scope="col">Score</th>
-                    </tr>
-                </thead>
-                {leaderboard.map((player, index) =>
-                    <tr>
-                        <th scope="row">{index+1}</th>
-                        <td>{player.username}</td>
-                        <td>{player.score}</td>
-                    </tr>
-                )}
-            </table>
+            <button className="btn btn-primary mb-4" onClick={showLeaderboard}>Show Leaderboard</button>
+            {leaderboardDisplay}
         
         </div>
     );

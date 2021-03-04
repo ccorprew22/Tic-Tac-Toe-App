@@ -170,9 +170,12 @@ def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, cham
         playerLoser = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
         playerLoser.score -= 1
         db.session.commit()
-        
-    #leaderboard= Players.Player.query.all()
-    #print(leaderboard)
+    #sending updated leaderboard
+    all_rankings = Players.Player.query.order_by(Players.Player.score.desc()).all()
+    leaderboard = [] #{'username': username, 'score' : score}
+    for player in all_rankings:
+        leaderboard.append({'username' : player.username, 'score': player.score})
+    data['leaderboard'] = leaderboard
     champ_user = [{'sid' : data['X'], 'user' : two_player[0]}, {'sid' : data['O'], 'user': two_player[1]}]
     data["champ_user"] = champ_user
     socketio.emit('game_over', data, broadcast=True, include_self=True)
