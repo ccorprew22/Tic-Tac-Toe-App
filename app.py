@@ -14,15 +14,15 @@ APP.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 # Gets rid of a warning
 APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(APP)
+DB = SQLAlchemy(APP)
 # IMPORTANT: This must be AFTER creating db variable to prevent
 # circular import issues
 import Players
-db.create_all()
+DB.create_all()
 
-cors = CORS(APP, resources={r"/*": {"origins": "*"}})
+CORS = CORS(APP, resources={r"/*": {"origins": "*"}})
 
-socketio = SocketIO(
+SOCKETIO = SocketIO(
     APP,
     cors_allowed_origins="*",
     json=json,
@@ -30,17 +30,17 @@ socketio = SocketIO(
     ping_interval=1
 )
 
-global NUM_PLAYERS
+#global NUM_PLAYERS
 NUM_PLAYERS = 0
-global TWO_PLAYER
+#global TWO_PLAYER
 TWO_PLAYER = ["", ""]
-global OVERALL_LST
+#global OVERALL_LST
 OVERALL_LST = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
-global REPLAY_LST
+#global REPLAY_LST
 REPLAY_LST = []
 #Temporary solution for problem involving empty spots on player list after disconnect, 
 #current problem is handling changing list length
-global DISPLAY_LST
+#global DISPLAY_LST
 DISPLAY_LST = []
 #global leaderboard
 #leaderboard = []
@@ -51,7 +51,7 @@ def index(filename):
     return send_from_directory('./build', filename)
 
 # When a client connects from this Socket connection, this function is run
-@socketio.on('connect')
+@SOCKETIO.on('connect')
 def on_connect():
     """Handles a connect user to the socket"""
     #sid = request.sid #socket id
@@ -59,7 +59,7 @@ def on_connect():
     #socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     
 # When a client disconnects from this Socket connection, this function is run
-@socketio.on('disconnect')
+@SOCKETIO.on('disconnect')
 def on_disconnect():
     """Handles removing player from player lists after disconnecting"""
     global OVERALL_LST
@@ -81,17 +81,17 @@ def on_disconnect():
     #send data on disconnect to remove player from list
     message = {'player_lst': OVERALL_LST, 'player_left': request.sid, 'display_lst' : DISPLAY_LST}
     print('User disconnected! : ' + request.sid)
-    socketio.emit('disconnect', message, broadcast=True, include_self=True)
+    SOCKETIO.emit('disconnect', message, broadcast=True, include_self=True)
     
 #Removes log in div
-@socketio.on('remove_login')
+@SOCKETIO.on('remove_login')
 def on_remove_login(data):
     """Changes front page after login to show board instead of login"""
-    socketio.emit("remove_login", data, broadcast=True, include_self=True)
+    SOCKETIO.emit("remove_login", data, broadcast=True, include_self=True)
 
 #When player logs in with username
 #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
-@socketio.on('player_joined') 
+@SOCKETIO.on('player_joined') 
 def on_player_joined(data):
     """Function that handles adding players to the database and player list after logging in"""
     global NUM_PLAYERS
@@ -103,8 +103,8 @@ def on_player_joined(data):
     player_user = Players.Player.query.filter_by(username=data['username']).scalar()
     if player_user is None:
         new_user = Players.Player(username=data['username'], score=100)
-        db.session.add(new_user)
-        db.session.commit()
+        DB.session.add(new_user)
+        DB.session.commit()
         
     if OVERALL_LST[0] == "Waiting for player": #did this for display.js after removing login
         OVERALL_LST[0] = {'sid' : data['sid'], 'username' : data['username']}
@@ -136,23 +136,23 @@ def on_player_joined(data):
     data['display_lst'] = DISPLAY_LST
     data['leaderboard'] = leaderboard
     print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True) 
+    SOCKETIO.emit('player_joined', data, broadcast=True, include_self=True) 
     #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
  
 # 'choice' is a custom event name that we just decided
-@socketio.on('choice')
+@SOCKETIO.on('choice')
 def on_choice(data): # data is whatever arg you pass in your emit call on client
     """Sends move choice to other users"""
-    socketio.emit('choice', data, broadcast=True, include_self=False)
+    SOCKETIO.emit('choice', data, broadcast=True, include_self=False)
 
  #When player makes turn change
-@socketio.on('turn')
+@SOCKETIO.on('turn')
 def on_turn(data):
     """Sends change of turn to other player"""
     print(str(data))
-    socketio.emit('turn', data, broadcast=True, include_self=True)
+    SOCKETIO.emit('turn', data, broadcast=True, include_self=True)
    
-@socketio.on('game_over')
+@SOCKETIO.on('game_over')
 #{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
 def on_game_over(data): 
     """Handles the sharing the information to all users after a game has ended"""
@@ -162,12 +162,12 @@ def on_game_over(data):
         print("GAME OVER!!!")
         x_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['X']) else False, OVERALL_LST))
         o_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['O']) else False, OVERALL_LST))
-        player_winner = db.session.query(Players.Player).filter_by(username=x_player[0]['username']).first()
+        player_winner = DB.session.query(Players.Player).filter(Players.Player.username==x_player[0]['username']).first()
         player_winner.score += 1
-        db.session.commit()
-        player_loser = db.session.query(Players.Player).filter_by(username=o_player[0]['username']).first()
+        DB.session.commit()
+        player_loser = DB.session.query(Players.Player).filter(Players.Player.username==o_player[0]['username']).first()
         player_loser.score -= 1
-        db.session.commit()
+        DB.session.commit()
         #print(playerWinner)
         winner_score = player_winner.score
         #loserScore = playerLoser.score
@@ -176,24 +176,24 @@ def on_game_over(data):
     elif data['champ'] == data['O']:
         x_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['X']) else False, OVERALL_LST))
         o_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['O']) else False, OVERALL_LST))
-        player_winner = db.session.query(Players.Player).filter_by(username=o_player[0]['username']).first()
+        player_winner = DB.session.query(Players.Player).filter_by(username=o_player[0]['username']).first()
         player_winner.score += 1
-        db.session.commit()
-        player_loser = db.session.query(Players.Player).filter_by(username=x_player[0]['username']).first()
+        DB.session.commit()
+        player_loser = DB.session.query(Players.Player).filter_by(username=x_player[0]['username']).first()
         player_loser.score -= 1
-        db.session.commit()
+        DB.session.commit()
     #sending updated leaderboard
     all_rankings = Players.Player.query.order_by(Players.Player.score.desc()).all()
     leaderboard = [] #{'username': username, 'score' : score}
     for player in all_rankings:
         leaderboard.append({'username' : player.username, 'score': player.score})
     data['leaderboard'] = leaderboard
-    champ_user = [{'sid' : data['X'], 'user' : TWO_PLAYER[0]}, {'sid' : data['O'], 'user': TWO_PLAYER[1]}]
+    champ_user=[{'sid':data['X'],'user':TWO_PLAYER[0]},{'sid':data['O'],'user':TWO_PLAYER[1]}]
     data["champ_user"] = champ_user
-    socketio.emit('game_over', data, broadcast=True, include_self=True)
+    SOCKETIO.emit('game_over', data, broadcast=True, include_self=True)
 
 #Replay
-@socketio.on("replay")
+@SOCKETIO.on("replay")
 def on_replay(data): #socket.id
     """Handles the game in the event of a rematch. Both players have to hit the rematch button OR New player game button"""
     global REPLAY_LST
@@ -209,13 +209,13 @@ def on_replay(data): #socket.id
     if len(REPLAY_LST) == 2:
         data = [True, len(REPLAY_LST), TWO_PLAYER, OVERALL_LST]
         REPLAY_LST = []
-    socketio.emit("replay", data, broadcast=True, include_self=True)
+    SOCKETIO.emit("replay", data, broadcast=True, include_self=True)
 
 if __name__ == '__main__':
-    socketio.run(
+    SOCKETIO.run(
         APP,
         host=os.getenv('IP', '0.0.0.0'),
-        port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
+        port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', '8081')),
         debug=False,
         use_reloader=False
     )
