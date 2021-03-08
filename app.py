@@ -7,23 +7,23 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv()) # This is to load your env variables from .env
 
-app = Flask(__name__, static_folder='./build/static')
+APP = Flask(__name__, static_folder='./build/static')
 
 # Point SQLAlchemy to your Heroku database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+APP.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 # Gets rid of a warning
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(APP)
 # IMPORTANT: This must be AFTER creating db variable to prevent
 # circular import issues
 import Players
 db.create_all()
 
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
+cors = CORS(APP, resources={r"/*": {"origins": "*"}})
 
 socketio = SocketIO(
-    app,
+    APP,
     cors_allowed_origins="*",
     json=json,
     manage_session=False,
@@ -38,12 +38,14 @@ global OVERALL_LST
 OVERALL_LST = ["Waiting for player", "Waiting for player"] #{sid : socketio.id, username : user}
 global REPLAY_LST
 REPLAY_LST = []
-global DISPLAY_LST #Temporary solution for problem involving empty spots on player list after disconnect, current problem is handling changing list length
+#Temporary solution for problem involving empty spots on player list after disconnect, 
+#current problem is handling changing list length
+global DISPLAY_LST
 DISPLAY_LST = []
 #global leaderboard
 #leaderboard = []
 
-@app.route('/', defaults={"filename": "index.html"})
+@APP.route('/', defaults={"filename": "index.html"})
 #@app.route('/<path:filename>')
 def index(filename):
     return send_from_directory('./build', filename)
@@ -51,27 +53,29 @@ def index(filename):
 # When a client connects from this Socket connection, this function is run
 @socketio.on('connect')
 def on_connect():
-    sid = request.sid #socket id
+    """Handles a connect user to the socket"""
+    #sid = request.sid #socket id
     print("User connected! " + request.sid)
     #socketio.emit('connect', player_lst, broadcast=True, include_self=True)
     
 # When a client disconnects from this Socket connection, this function is run
 @socketio.on('disconnect')
 def on_disconnect():
+    """Handles removing player from player lists after disconnecting"""
     global OVERALL_LST
     global TWO_PLAYER
     global DISPLAY_LST
     removed_user = ""
     for i in range(len(OVERALL_LST)):
-        if type(OVERALL_LST[i]) is str:
+        if isinstance(OVERALL_LST[i], str):
             continue
         elif OVERALL_LST[i]['sid'] == request.sid:
             removed_user = OVERALL_LST[i]
             OVERALL_LST[i] = "Disconnected Player"
             break
     if request.sid in TWO_PLAYER:
-        index = TWO_PLAYER.index(request.sid)
-        TWO_PLAYER[index] = "Disconnected Player"
+        _index_ = TWO_PLAYER.index(request.sid)
+        TWO_PLAYER[_index_] = "Disconnected Player"
     if removed_user in DISPLAY_LST:
         DISPLAY_LST.remove(removed_user)
     #send data on disconnect to remove player from list
@@ -82,11 +86,14 @@ def on_disconnect():
 #Removes log in div
 @socketio.on('remove_login')
 def on_remove_login(data):
+    """Changes front page after login to show board instead of login"""
     socketio.emit("remove_login", data, broadcast=True, include_self=True)
 
 #When player logs in with username
-@socketio.on('player_joined') #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
+#{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [] }
+@socketio.on('player_joined') 
 def on_player_joined(data):
+    """Function that handles adding players to the database and player list after logging in"""
     global NUM_PLAYERS
     global TWO_PLAYER
     global OVERALL_LST
@@ -94,7 +101,7 @@ def on_player_joined(data):
     #database check
     #bool(session.query(Players.Player).filter_by(username='username').first())
     player_user = Players.Player.query.filter_by(username=data['username']).scalar()
-    if player_user == None:
+    if player_user is None:
         new_user = Players.Player(username=data['username'], score=100)
         db.session.add(new_user)
         db.session.commit()
@@ -129,31 +136,36 @@ def on_player_joined(data):
     data['display_lst'] = DISPLAY_LST
     data['leaderboard'] = leaderboard
     print(data)
-    socketio.emit('player_joined', data, broadcast=True, include_self=True) #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
+    socketio.emit('player_joined', data, broadcast=True, include_self=True) 
+    #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}], display_lst : display_lst, leaderboard : [{username: username, score: score}]}
  
 # 'choice' is a custom event name that we just decided
 @socketio.on('choice')
 def on_choice(data): # data is whatever arg you pass in your emit call on client
+    """Sends move choice to other users"""
     socketio.emit('choice', data, broadcast=True, include_self=False)
 
  #When player makes turn change
 @socketio.on('turn')
 def on_turn(data):
+    """Sends change of turn to other player"""
     print(str(data))
     socketio.emit('turn', data, broadcast=True, include_self=True)
    
 @socketio.on('game_over')
-def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
+#{winner: winner, X: two_player.X, O: two_player.O, champ: sId}
+def on_game_over(data): 
+    """Handles the sharing the information to all users after a game has ended"""
     global OVERALL_LST
     #using display_lst is faster than looping through player list
     if data['champ'] == data['X']:
         print("GAME OVER!!!")
-        X = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['X']) else False, OVERALL_LST))
-        O = list(filter(lambda x: x if(type(x) == dict and x['sid'] == data['O']) else False, OVERALL_LST))
-        player_winner = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        x_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['X']) else False, OVERALL_LST))
+        o_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['O']) else False, OVERALL_LST))
+        player_winner = db.session.query(Players.Player).filter_by(username=x_player[0]['username']).first()
         player_winner.score += 1
         db.session.commit()
-        player_loser = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        player_loser = db.session.query(Players.Player).filter_by(username=o_player[0]['username']).first()
         player_loser.score -= 1
         db.session.commit()
         #print(playerWinner)
@@ -162,10 +174,12 @@ def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, cham
         print(winner_score)
         
     elif data['champ'] == data['O']:
-        player_winner = db.session.query(Players.Player).filter_by(username=O[0]['username']).first()
+        x_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['X']) else False, OVERALL_LST))
+        o_player = list(filter(lambda x: x if(isinstance(x, dict) and x['sid'] == data['O']) else False, OVERALL_LST))
+        player_winner = db.session.query(Players.Player).filter_by(username=o_player[0]['username']).first()
         player_winner.score += 1
         db.session.commit()
-        player_loser = db.session.query(Players.Player).filter_by(username=X[0]['username']).first()
+        player_loser = db.session.query(Players.Player).filter_by(username=x_player[0]['username']).first()
         player_loser.score -= 1
         db.session.commit()
     #sending updated leaderboard
@@ -181,12 +195,13 @@ def on_game_over(data): #{winner: winner, X: two_player.X, O: two_player.O, cham
 #Replay
 @socketio.on("replay")
 def on_replay(data): #socket.id
+    """Handles the game in the event of a rematch. Both players have to hit the rematch button OR New player game button"""
     global REPLAY_LST
     global TWO_PLAYER
     if "Disconnected Player" in TWO_PLAYER: #to fill open spot
         if data['sid'] not in TWO_PLAYER:
-            index = TWO_PLAYER.index("Disconnected Player")
-            TWO_PLAYER[index] = data['sid']
+            _index_ = TWO_PLAYER.index("Disconnected Player")
+            TWO_PLAYER[_index_] = data['sid']
             REPLAY_LST.append(data['sid'])
     if data['sid'] in TWO_PLAYER and data['sid'] not in REPLAY_LST:
         REPLAY_LST.append(data['sid'])
@@ -198,7 +213,7 @@ def on_replay(data): #socket.id
 
 if __name__ == '__main__':
     socketio.run(
-        app,
+        APP,
         host=os.getenv('IP', '0.0.0.0'),
         port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
         debug=False,
