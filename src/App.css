@@ -6,7 +6,7 @@
 body {
   background-color: dimgray;
 }
-.no-border{
+.no-border {
   border: none;
 }
 
@@ -14,62 +14,68 @@ body {
   margin-top: 1rem;
 }
 
-.chalk-font{
-  font-family: 'Fredericka the Great', cursive;
+.chalk-font {
+  font-family: "Fredericka the Great", cursive;
   color: white;
   font-weight: bold;
 }
-.center{
-    text-align: center;
-    margin-right: auto;
-    margin-left: auto;
+.center {
+  text-align: center;
+  margin-right: auto;
+  margin-left: auto;
 }
 .card {
-    width: 300px;
-    background-color: rgba(255,255,255, 0.0) !important;
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0) !important;
 }
 .board {
-	width: 300px; /* Total horizontal dimensions */
-	height: 300px; /* Total vertical dimensions */
-	display: grid; /* Enables CSS Grid */
-	grid-template-columns: repeat(3, 1fr); /* Total horizontal space broken into 3 columns */
-  grid-template-rows: repeat(3, 1fr); /* Total vertical space broken into 3 rows */
+  width: 300px; /* Total horizontal dimensions */
+  height: 300px; /* Total vertical dimensions */
+  display: grid; /* Enables CSS Grid */
+  grid-template-columns: repeat(
+    3,
+    1fr
+  ); /* Total horizontal space broken into 3 columns */
+  grid-template-rows: repeat(
+    3,
+    1fr
+  ); /* Total vertical space broken into 3 rows */
   margin: auto;
   opacity: 0.6;
 }
-.card-header{
-  font-family: 'Fredericka the Great', cursive;
+.card-header {
+  font-family: "Fredericka the Great", cursive;
   color: white;
   font-weight: bold;
   font-size: 20px;
 }
-.list-group-item{
-  font-family: 'Fredericka the Great', cursive;
+.list-group-item {
+  font-family: "Fredericka the Great", cursive;
   color: white;
   font-weight: bold;
-  background-color: rgba(255,255,255, 0.0) !important;
+  background-color: rgba(255, 255, 255, 0) !important;
   font-size: 20px;
 }
 .box {
   border: 1px solid black; /* Shows the lines in the CSS grid */
-  font-family: 'Rock Salt', cursive;
+  font-family: "Rock Salt", cursive;
   font-size: 50px;
   font-weight: bold;
   color: white;
 }
-.symbol-margin{
+.symbol-margin {
   margin-top: 7px;
 }
 
-.display{
+.display {
   color: white;
-  font-family: 'Fredericka the Great';
+  font-family: "Fredericka the Great";
   font-weight: bold;
 }
 
 .mx-auto {
- margin-right: auto !important;
- margin-left: auto !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
 }
 
 .btn {
@@ -78,10 +84,10 @@ body {
   margin: auto;
 }
 
-.yellow{
+.yellow {
   color: yellow;
 }
 
-.white{
+.white {
   color: white;
 }
