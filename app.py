@@ -111,21 +111,12 @@ def on_remove_login(data):
 def on_player_joined(data):
     """Function that handles adding players to the database and player list after logging in"""
     global NUM_PLAYERS
-    #global TWO_PLAYER
-    #global OVERALL_LST
-    #global DISPLAY_LST
     #database check
     #bool(session.query(Players.Player).filter_by(username='username').first())
     try:
-        player_user = Players.Player.query.filter_by(
-            username=data['username']).scalar()
-        if player_user is None:
-            new_user = Players.Player(username=data['username'], score=100)
-            DB.session.add(new_user)
-            DB.session.commit()
+        add_username(data['username'])
     except:
         pass
-
     if OVERALL_LST[0] == "Waiting for player":  #did this for display.js after removing login
         OVERALL_LST[0] = {'sid': data['sid'], 'username': data['username']}
     elif OVERALL_LST[1] == "Waiting for player":
@@ -166,7 +157,22 @@ def on_player_joined(data):
     print(TWO_PLAYER)
     return TWO_PLAYER
 
-# 'choice' is a custom event name that we just decided
+def add_username(user):
+    """Adds username to database if doesn't already exist"""
+
+    #player_user = Players.Player.query.filter_by(username=user).scalar()
+    try:
+        new_user = Players.Player(username=user, score=100)
+        DB.session.add(new_user)
+        #print("added")
+        DB.session.commit()
+        print("New")
+        return "New User Added: " + user
+    except:
+        print("Existing")
+        return "Existing User: " + user
+    
+    
 @SOCKETIO.on('choice')
 def on_choice(
         data):  # data is whatever arg you pass in your emit call on client
