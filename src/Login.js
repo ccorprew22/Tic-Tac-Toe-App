@@ -6,9 +6,9 @@ export function Login() {
   // const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
   const [error, setError] = useState('');
   function inputUsername() {
-    if (inputRef != null) {
+    if (inputRef !== null) {
       const username = inputRef.current.value;
-      if(username.length == 0){
+      if(username.length === 0){
         setError(prevError => prevError = <p className="error center">Input Box Cannot Be Empty</p>);
       }else{
         socket.emit('remove_login', { sid: socket.id });

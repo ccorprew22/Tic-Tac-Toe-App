@@ -1,18 +1,18 @@
 // import React from 'react';
 import { ListItem } from './ListItem';
 import { useState } from 'react';
-import { socket } from './App.js';
+import { socket } from './App';
 
 export function Players(player) {
   //Online players list
   const [player_lst, addPlayer] = useState([]);
-  const [twoPlayer, setPlayer] = useState();
+  // const [twoPlayer, setPlayer] = useState();
 
   socket.on('player_joined', (data) => {
     // { sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, username: username}], display_lst: display_lst }
     if (data !== undefined) {
       addPlayer((prevPlayer) => (prevPlayer = data.display_lst)); // playerlst
-      setPlayer((prevPlayer) => (prevPlayer = data.two_players)); // two players
+      // setPlayer((prevPlayer) => (prevPlayer = data.two_players)); // two players
     }
   });
   socket.on('disconnect', (data) => {

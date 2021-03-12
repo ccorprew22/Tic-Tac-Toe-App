@@ -1,14 +1,14 @@
 // import React from "react";
-import { useState } from "react";
+import { useState } from 'react';
 import { socket } from "./App";
 import { Replay } from "./Replay";
 
 export function Display() {
   // const sId = socket.id;
   // console.log(socket.id);
-  const [playerX, setX] = useState("X");
-  const [playerO, setO] = useState("O");
-  const [result, setResult] = useState("");
+  const [playerX, setX] = useState('X');
+  const [playerO, setO] = useState('O');
+  const [result, setResult] = useState('');
   // const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
   // var display;
   let display = (
@@ -17,7 +17,7 @@ export function Display() {
     </h1>
   );
 
-  socket.on("player_joined", (data) => {
+  socket.on('player_joined', (data) => {
     // { sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, username :user}] }
     if (data !== undefined) {
       // console.log(data);
@@ -27,7 +27,7 @@ export function Display() {
         for (let i = 0; i < data.players.length; i++) {
           // Attempting to fill in page for late players after a disconnect
           if (
-            data.two_players[0] !== "Disconnected Player" &&
+            data.two_players[0] !== 'Disconnected Player' &&
             data.players[i].sid === data.two_players[0]
           ) {
             setX(
@@ -35,11 +35,11 @@ export function Display() {
                 (prevX = [data.players[i].sid, data.players[i].username])
             );
             setResult(
-              (prevResult) => (prevResult = "Player Disconnect! Game Over")
+              (prevResult) => (prevResult = 'Player Disconnect! Game Over')
             );
             break;
           } else if (
-            data.two_players[1] !== "Disconnected Player" &&
+            data.two_players[1] !== 'Disconnected Player' &&
             data.players[i].sid === data.two_players[1]
           ) {
             setO(
@@ -57,11 +57,11 @@ export function Display() {
             break;
           }
         }
-      } else if (playerX === "X" && data.players.length === 1) {
+      } else if (playerX === 'X' && data.players.length === 1) {
         setX(
           (prevX) => (prevX = [data.players[0].sid, data.players[0].username])
         );
-      } else if (playerO === "O" && data.players.length >= 2) {
+      } else if (playerO === 'O' && data.players.length >= 2) {
         setX(
           (prevX) => (prevX = [data.players[0].sid, data.players[0].username])
         );
@@ -74,25 +74,25 @@ export function Display() {
     }
   });
 
-  socket.on("disconnect", (data) => {
+  socket.on('disconnect', (data) => {
     // {'player_lst': player_lst, 'player_left': request.sid}
     if (data !== undefined) {
       if (data.player_left === playerX[0]) {
         setResult(
-          (prevResult) => (prevResult = "Player Disconnect! Game Over")
+          (prevResult) => (prevResult = 'Player Disconnect! Game Over')
         ); // Game over due to X disconnect)
-        setX((prevX) => (prevX = "X"));
+        setX((prevX) => (prevX = 'X'));
       } else if (data.player_left === playerO[0]) {
         setResult(
-          (prevResult) => (prevResult = "Player Disconnect! Game Over")
+          (prevResult) => (prevResult = 'Player Disconnect! Game Over')
         ); // Game over due to O disconnect)
-        setX((prevX) => (prevX = "O"));
-        console.log("O left");
+        setX((prevX) => (prevX = 'O'));
+        console.log('O left');
       }
     }
   });
 
-  socket.on("game_over", (data) => {
+  socket.on('game_over', (data) => {
     // {winner: winner, X: two_player.X, O: two_player.O, champ: sId, champ_user = [{sid: sid, user: username}]}
     // console.log(data);
     if (data.winner === true) {
@@ -104,22 +104,22 @@ export function Display() {
       } else {
         winner = playerO;
       }
-      setResult((prevResult) => (prevResult = "Winner : " + winner[1])); //Game over
+      setResult((prevResult) => (prevResult = 'Winner : ' + winner[1])); //Game over
     } else {
-      setResult((prevResult) => (prevResult = "Draw")); //Draw
+      setResult((prevResult) => (prevResult = 'Draw')); //Draw
     }
   });
 
-  socket.on("replay", (data) => {
+  socket.on('replay', (data) => {
     // [True, len(replay_lst), two_player, overall_lst = {sid: sid, username: user}]
     if (data !== undefined) {
       if (data[0] === true && data[1] === 1) {
-        setResult((prevResult) => (prevResult = ""));
+        setResult((prevResult) => (prevResult = ''));
         setX((prevX) => (prevX = [data[2][0], data[3][0].username]));
         setO((prevO) => (prevO = [data[2][1], data[3][1].username]));
         // display = <h1 className="text-center">X: {playerX} vs O: {playerO}</h1>
       } else if (data[0] === true && data[1] === 2) {
-        setResult((prevResult) => (prevResult = ""));
+        setResult((prevResult) => (prevResult = ''));
         let x_index = -1;
         let y_index = -1;
         for (let i = 0; i < data[3].length; i++) {
