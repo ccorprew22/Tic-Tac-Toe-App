@@ -1,3 +1,9 @@
+'''
+    app.py
+    
+    Server file.
+'''
+
 import os
 from flask import Flask, send_from_directory, json, request
 from flask_socketio import SocketIO
@@ -90,7 +96,7 @@ def on_disconnect():
     }
     print('User disconnected! : ' + request.sid)
     SOCKETIO.emit('disconnect', message, broadcast=True, include_self=True)
-
+    return [OVERALL_LST, DISPLAY_LST]
 
 #Removes log in div
 @SOCKETIO.on('remove_login')
@@ -110,12 +116,15 @@ def on_player_joined(data):
     #global DISPLAY_LST
     #database check
     #bool(session.query(Players.Player).filter_by(username='username').first())
-    player_user = Players.Player.query.filter_by(
-        username=data['username']).scalar()
-    if player_user is None:
-        new_user = Players.Player(username=data['username'], score=100)
-        DB.session.add(new_user)
-        DB.session.commit()
+    try:
+        player_user = Players.Player.query.filter_by(
+            username=data['username']).scalar()
+        if player_user is None:
+            new_user = Players.Player(username=data['username'], score=100)
+            DB.session.add(new_user)
+            DB.session.commit()
+    except:
+        pass
 
     if OVERALL_LST[0] == "Waiting for player":  #did this for display.js after removing login
         OVERALL_LST[0] = {'sid': data['sid'], 'username': data['username']}
@@ -150,11 +159,12 @@ def on_player_joined(data):
     data['late_join'] = late_join
     data['display_lst'] = DISPLAY_LST
     data['leaderboard'] = leaderboard
-    print(data)
+    #print(data)
     SOCKETIO.emit('player_joined', data, broadcast=True, include_self=True)
     #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}],
     #display_lst : display_lst, leaderboard : [{username: username, score: score}]}
-
+    print(TWO_PLAYER)
+    return TWO_PLAYER
 
 # 'choice' is a custom event name that we just decided
 @SOCKETIO.on('choice')
@@ -256,12 +266,13 @@ def on_replay(data):  #socket.id
             REPLAY_LST.append(data['sid'])
     if data['sid'] in TWO_PLAYER and data['sid'] not in REPLAY_LST:
         REPLAY_LST.append(data['sid'])
-
+    curr_replay_lst = REPLAY_LST #so that full list will show after it is emptied
     if len(REPLAY_LST) == 2:
         data = [True, len(REPLAY_LST), TWO_PLAYER, OVERALL_LST]
         REPLAY_LST = []
     SOCKETIO.emit("replay", data, broadcast=True, include_self=True)
-
+    print(REPLAY_LST)
+    return curr_replay_lst
 
 if __name__ == '__main__':
     SOCKETIO.run(
