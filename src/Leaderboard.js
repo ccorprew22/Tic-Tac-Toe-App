@@ -43,6 +43,22 @@ export function Leaderboard() {
                 if (socket.id === data['sid']) {
                     setUser(prevUser => prevUser = {sid: socket.id, username : data['username']});
                 }
+                if (boardOn === "on") { // updates board if showing on screen
+                    setDisplay(prevDisplay => prevDisplay = <table className="table table-hover table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {data.leaderboard.map((player, index) =>
+                        <Username username={player.username} score={ player.score } userLogged={ loggedUser.username } index={ index+1 }/>
+                    )}
+                    </tbody>
+                </table>);
+                }
             }
             
     });
