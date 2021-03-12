@@ -1,8 +1,17 @@
-import { render, screen } from "@testing-library/react";
-import App from "./App";
+import { render, screen, fireEvent } from '@testing-library/react';
+import App from './App';
 
-test("renders learn react link", () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('Error after empty input appears', () => {
+  const { getByLabelText } = render(<App />);
+  const loginButtonElement = screen.getByText('Login');
+  const input = getByLabelText("username");
+  expect(input.value).toBe("");
+  // expect(loginButtonElement).toBeInTheDocument();
+  // fireEvent.change(input, { target: { value: "chris123" }});
+  // expect(input.value).toBe("chris123");
+  fireEvent.click(loginButtonElement);
+  const error = screen.getByText('Input Box Cannot Be Empty');
+  expect(error).toBeInTheDocument();
+  
 });
+

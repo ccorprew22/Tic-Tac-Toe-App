@@ -19,6 +19,13 @@ body {
   color: white;
   font-weight: bold;
 }
+
+.error{
+  color: white;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 .center {
   text-align: center;
   margin-right: auto;
