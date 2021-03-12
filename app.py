@@ -1,6 +1,6 @@
 '''
     app.py
-    
+
     Server file.
 '''
 
@@ -117,6 +117,7 @@ def on_player_joined(data):
         add_username(data['username'])
     except:
         pass
+
     if OVERALL_LST[0] == "Waiting for player":  #did this for display.js after removing login
         OVERALL_LST[0] = {'sid': data['sid'], 'username': data['username']}
     elif OVERALL_LST[1] == "Waiting for player":
@@ -152,7 +153,8 @@ def on_player_joined(data):
     data['leaderboard'] = leaderboard
     #print(data)
     SOCKETIO.emit('player_joined', data, broadcast=True, include_self=True)
-    #{ sid: socket.id, username : username, num_players: num_players, two_players: [], players: [{sid: sid, user: user}],
+    #{ sid: socket.id, username : username, num_players: num_players,
+    #two_players: [], players: [{sid: sid, user: user}],
     #display_lst : display_lst, leaderboard : [{username: username, score: score}]}
     print(TWO_PLAYER)
     return TWO_PLAYER
@@ -169,16 +171,15 @@ def add_username(user):
         print("New")
         return "New User Added: " + user
     except:
+        DB.session.rollback()
         print("Existing")
         return "Existing User: " + user
-    
-    
+
 @SOCKETIO.on('choice')
 def on_choice(
         data):  # data is whatever arg you pass in your emit call on client
     """Sends move choice to other users"""
     SOCKETIO.emit('choice', data, broadcast=True, include_self=False)
-
 
 #When player makes turn change
 @SOCKETIO.on('turn')
@@ -262,7 +263,10 @@ def on_game_over(data):
 #Replay
 @SOCKETIO.on("replay")
 def on_replay(data):  #socket.id
-    """Handles the game in the event of a rematch. Both players have to hit the rematch button OR New player game button"""
+    """
+    Handles the game in the event of a rematch. Both players have
+    to hit the rematch button OR New player game button
+    """
     global REPLAY_LST
     #global TWO_PLAYER
     if "Disconnected Player" in TWO_PLAYER:  #to fill open spot
