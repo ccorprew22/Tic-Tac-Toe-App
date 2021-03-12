@@ -9,9 +9,9 @@ export function Board (){
     const sId = socket.id;
     const inputRef = useRef(null);
     const [result, setResult] = useState(null);
-    const [two_player, setPlayer] = useState({X: '', O: ''});
-    const X = two_player.X;
-    const O = two_player.O;
+    const [twoPlayer, setPlayer] = useState({X: '', O: ''});
+    const X = twoPlayer.X;
+    const O = twoPlayer.O;
     // const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
     // const [playerId, setId] = useState(0);//Dont send in socket
     const [turns, changeTurn] = useState({turn: ''});
@@ -28,26 +28,26 @@ export function Board (){
                                         {id: 8, symbol: ''},
                                         ]);
                                       
-    function check(old_board, squareId, symbol){
+    function check(oldBoard, squareId, symbol){
         const lines = [
-                        [0, 1, 2],//top horizontal
-                        [3, 4, 5],//mid horizontal
-                        [6, 7, 8],//bottom horizontal
-                        [0, 3, 6],//left vert
-                        [1, 4, 7],//mid vert
-                        [2, 5, 8],//right vert
-                        [0, 4, 8],//left diagonal
-                        [2, 4, 6],//right diagonal
+                        [0, 1, 2],// top horizontal
+                        [3, 4, 5],// mid horizontal
+                        [6, 7, 8],// bottom horizontal
+                        [0, 3, 6],// left vert
+                        [1, 4, 7],// mid vert
+                        [2, 5, 8],// right vert
+                        [0, 4, 8],// left diagonal
+                        [2, 4, 6],// right diagonal
                       ];
-        var board = old_board;
-        board[squareId] = {id: squareId, symbol: symbol};
-        //console.log(board);
+        var testBoard = oldBoard;
+        testBoard[squareId] = {id: squareId, symbol: symbol};
+        //  console.log(board);
         for(var i=0; i<lines.length; i++){
             var a = lines[i][0];
             var b = lines[i][1];
             var c = lines[i][2];
-            if(board[a].symbol === board[b].symbol && board[a].symbol === board[c].symbol){
-                if(board[a].symbol !== '' || board[b].symbol !== '' || board[c].symbol !== '') //So that it won't count three consecutive blanks as a game over
+            if(testBoard[a].symbol === testBoard[b].symbol && testBoard[a].symbol === testBoard[c].symbol){
+                if(testBoard[a].symbol !== '' || testBoard[b].symbol !== '' || testBoard[c].symbol !== '') //So that it won't count three consecutive blanks as a game over
                     return true;
             }
         }
@@ -60,48 +60,48 @@ export function Board (){
     }
     function onClickSymbol(squareId, symbol){
         // console.log(socket);
-        var data_board = board;
-        var curr_turn = turns.turn;
+        var dataBoard = board;
+        var currTurn = turns.turn;
         // console.log("Player ID: " + sId);
-        console.log('Current Turn: ' + curr_turn);
+        console.log('Current Turn: ' + currTurn);
         
         if (inputRef !== null && symbol === '' && result === null){//Check to see if square is taken
             console.log(squareId);
             var symb = '';
             console.log(turns);
-            if(curr_turn === sId){
-                if(two_player.X === sId){
+            if(currTurn === sId){
+                if(twoPlayer.X === sId){
                     symb = 'X';
                     console.log('X MOVED');
                     changeTurn(prevTurn => {
-                        return {...prevTurn, turn: two_player.O};
+                        return {...prevTurn, turn: twoPlayer.O};
                     });
-                    socket.emit('turn', {turn: two_player.O});
-                }else if(two_player.O === sId){
-                    symb = "O";
-                    console.log("O MOVED");
-                    changeTurn(prevTurn => { //EMIT CHANGE TO OTHERS
-                        return {...prevTurn, turn: two_player.X};
+                    socket.emit('turn', {turn: twoPlayer.O});
+                }else if(twoPlayer.O === sId){
+                    symb = 'O';
+                    console.log('O MOVED');
+                    changeTurn(prevTurn => {
+                        return {...prevTurn, turn: twoPlayer.X};
                     });
-                    socket.emit('turn', {turn: two_player.X});
+                    socket.emit('turn', {turn: twoPlayer.X});
                 }
             }
             setBoard(board.map((square) => square.id === squareId ? {...square, symbol: symb} : square));
-            var _check_ = check(board, squareId, symb);
-            console.log(_check_);
-            if(_check_ === true){
+            var boardCheck = check(board, squareId, symb);
+            console.log(boardCheck);
+            if(boardCheck === true){
                 winner = true;
                 setResult(prevResult => prevResult = true);
-                socket.emit('game_over', {winner: winner, X: two_player.X, O: two_player.O, champ: sId});
+                socket.emit('game_over', {winner: winner, X: twoPlayer.X, O: twoPlayer.O, champ: sId});
                 console.log('Game over');
-            }else if(_check_ === false){//Draw if board is full
+            }else if(boardCheck === false){//Draw if board is full
                 winner = false;
                 setResult(prevResult => prevResult = false);
-                socket.emit('game_over', {winner: winner, X: two_player.X, O: two_player.O, champ: null});
+                socket.emit('game_over', {winner: winner, X: twoPlayer.X, O: twoPlayer.O, champ: null});
                 console.log('Game over');
             }
-            data_board.map((square) => square.id === squareId ? square.symbol = symb : square); //board for emit
-            socket.emit('choice', {board: data_board, winner: winner}); // emits event, sending entire board and winner
+            dataBoard.map((square) => square.id === squareId ? square.symbol = symb : square); //board for emit
+            socket.emit('choice', {board: dataBoard, winner: winner}); // emits event, sending entire board and winner
             
         }
     }
@@ -149,7 +149,7 @@ export function Board (){
         if(data !== undefined){
             // console.log(data);
             if(data[0] === true){
-                setBoard(board.map((square) => square = {id: square.id, symbol : "" }));
+                setBoard(board.map((square) => square = {id: square.id, symbol : '' }));
                 setResult(prevResult => prevResult = null);
                 setPlayer(prevPlayers => prevPlayers = {X: data[2][0], O: data[2][1]});
                 changeTurn(prevTurn => prevTurn = {turn: data[2][0]});
@@ -159,12 +159,12 @@ export function Board (){
 
     useEffect(() => {
         socket.off('choice').on('choice', (data) => { // responds when 'choice' is emitted
-          var new_board = data.board;
+          var newBoard = data.board;
           // console.log(new_board[0].symbol);
           var i = 0;
           setBoard(board.map((square) => {
-              if(square.id === new_board[i].id){
-                  return {...square, symbol: new_board[i++].symbol};
+              if(square.id === newBoard[i].id){
+                  return {...square, symbol: newBoard[i++].symbol};
               }else{
                   i++;
               }
