@@ -100,6 +100,7 @@ def on_disconnect():
     SOCKETIO.emit('disconnect', message, broadcast=True, include_self=True)
     return [OVERALL_LST, DISPLAY_LST]
 
+
 #Removes log in div
 @SOCKETIO.on('remove_login')
 def on_remove_login(data):
@@ -120,7 +121,8 @@ def on_player_joined(data):
     except:
         pass
 
-    if OVERALL_LST[0] == "Waiting for player":  #did this for display.js after removing login
+    if OVERALL_LST[
+            0] == "Waiting for player":  #did this for display.js after removing login
         OVERALL_LST[0] = {'sid': data['sid'], 'username': data['username']}
     elif OVERALL_LST[1] == "Waiting for player":
         OVERALL_LST[1] = {'sid': data['sid'], 'username': data['username']}
@@ -149,7 +151,8 @@ def on_player_joined(data):
         })
 
     data['two_players'] = TWO_PLAYER  #Player list
-    data['players'] = OVERALL_LST  #Overall list usernames {sid: sid, username: username}
+    data[
+        'players'] = OVERALL_LST  #Overall list usernames {sid: sid, username: username}
     data['late_join'] = late_join
     data['display_lst'] = DISPLAY_LST
     data['leaderboard'] = leaderboard
@@ -160,6 +163,7 @@ def on_player_joined(data):
     #display_lst : display_lst, leaderboard : [{username: username, score: score}]}
     print(TWO_PLAYER)
     return TWO_PLAYER
+
 
 def add_username(user):
     """Adds username to database if doesn't already exist"""
@@ -177,11 +181,13 @@ def add_username(user):
         print("Existing")
         return "Existing User: " + user
 
+
 @SOCKETIO.on('choice')
 def on_choice(
         data):  # data is whatever arg you pass in your emit call on client
     """Sends move choice to other users"""
     SOCKETIO.emit('choice', data, broadcast=True, include_self=False)
+
 
 #When player makes turn change
 @SOCKETIO.on('turn')
@@ -218,14 +224,21 @@ def on_game_over(data):
     data["champ_user"] = champ_user
     SOCKETIO.emit('game_over', data, broadcast=True, include_self=True)
 
-def score_update(champ, X, O):
+
+def score_update(champ, X, O): #all sids
     """Update score for winner and loser"""
     #returns list of 1 length with dictionary of {sid, username}
     global OVERALL_LST
     winner = None
     loser = None
-    x_player = list(filter(lambda x: x if (isinstance(x, dict) and x['sid'] == X) else False, OVERALL_LST))
-    o_player = list(filter(lambda x: x if (isinstance(x, dict) and x['sid'] == O) else False, OVERALL_LST))
+    x_player = list(
+        filter(
+            lambda x: x if (isinstance(x, dict) and x['sid'] == X) else False,
+            OVERALL_LST))
+    o_player = list(
+        filter(
+            lambda x: x if (isinstance(x, dict) and x['sid'] == O) else False,
+            OVERALL_LST))
     if champ == X:
         winner = x_player
         loser = o_player
@@ -233,16 +246,19 @@ def score_update(champ, X, O):
         winner = o_player
         loser = x_player
         #print("GAME OVER!!!")
-    player_winner = DB.session.query(Players.Player).filter(Players.Player.username == winner[0]['username']).first()
+    player_winner = DB.session.query(Players.Player).filter(
+        Players.Player.username == winner[0]['username']).first()
     player_winner.score += 1
     DB.session.commit()
-    player_loser = DB.session.query(Players.Player).filter(Players.Player.username == loser[0]['username']).first()
+    player_loser = DB.session.query(Players.Player).filter(
+        Players.Player.username == loser[0]['username']).first()
     player_loser.score -= 1
     DB.session.commit()
     #print(playerWinner)
     #winner_score = player_winner.score
     #loserScore = playerLoser.score
     #print(winner_score)
+
 
 #Replay
 @SOCKETIO.on("replay")
@@ -260,13 +276,14 @@ def on_replay(data):  #socket.id
             REPLAY_LST.append(data['sid'])
     if data['sid'] in TWO_PLAYER and data['sid'] not in REPLAY_LST:
         REPLAY_LST.append(data['sid'])
-    curr_replay_lst = REPLAY_LST #so that full list will show after it is emptied
+    curr_replay_lst = REPLAY_LST  #so that full list will show after it is emptied
     if len(REPLAY_LST) == 2:
         data = [True, len(REPLAY_LST), TWO_PLAYER, OVERALL_LST]
         REPLAY_LST = []
     SOCKETIO.emit("replay", data, broadcast=True, include_self=True)
     print(REPLAY_LST)
     return curr_replay_lst
+
 
 if __name__ == '__main__':
     SOCKETIO.run(
