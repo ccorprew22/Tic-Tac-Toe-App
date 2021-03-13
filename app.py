@@ -197,50 +197,7 @@ def on_game_over(data):
     """Handles the sharing the information to all users after a game has ended"""
     global OVERALL_LST
     #using display_lst is faster than looping through player list
-    if data['champ'] == data['X']:
-        print("GAME OVER!!!")
-        x_player = list(
-            filter(
-                lambda x: x
-                if (isinstance(x, dict) and x['sid'] == data['X']) else False,
-                OVERALL_LST))
-        o_player = list(
-            filter(
-                lambda x: x
-                if (isinstance(x, dict) and x['sid'] == data['O']) else False,
-                OVERALL_LST))
-        player_winner = DB.session.query(Players.Player).filter(
-            Players.Player.username == x_player[0]['username']).first()
-        player_winner.score += 1
-        DB.session.commit()
-        player_loser = DB.session.query(Players.Player).filter(
-            Players.Player.username == o_player[0]['username']).first()
-        player_loser.score -= 1
-        DB.session.commit()
-        #print(playerWinner)
-        winner_score = player_winner.score
-        #loserScore = playerLoser.score
-        print(winner_score)
-
-    elif data['champ'] == data['O']:
-        x_player = list(
-            filter(
-                lambda x: x
-                if (isinstance(x, dict) and x['sid'] == data['X']) else False,
-                OVERALL_LST))
-        o_player = list(
-            filter(
-                lambda x: x
-                if (isinstance(x, dict) and x['sid'] == data['O']) else False,
-                OVERALL_LST))
-        player_winner = DB.session.query(Players.Player).filter_by(
-            username=o_player[0]['username']).first()
-        player_winner.score += 1
-        DB.session.commit()
-        player_loser = DB.session.query(Players.Player).filter_by(
-            username=x_player[0]['username']).first()
-        player_loser.score -= 1
-        DB.session.commit()
+    score_update(data['champ'], data['X'], data['O'])
     #sending updated leaderboard
     all_rankings = Players.Player.query.order_by(
         Players.Player.score.desc()).all()
@@ -261,6 +218,31 @@ def on_game_over(data):
     data["champ_user"] = champ_user
     SOCKETIO.emit('game_over', data, broadcast=True, include_self=True)
 
+def score_update(champ, X, O):
+    """Update score for winner and loser"""
+    #returns list of 1 length with dictionary of {sid, username}
+    global OVERALL_LST
+    winner = None
+    loser = None
+    x_player = list(filter(lambda x: x if (isinstance(x, dict) and x['sid'] == X) else False, OVERALL_LST))
+    o_player = list(filter(lambda x: x if (isinstance(x, dict) and x['sid'] == O) else False, OVERALL_LST))
+    if champ == X:
+        winner = x_player
+        loser = o_player
+    elif champ == O:
+        winner = o_player
+        loser = x_player
+        #print("GAME OVER!!!")
+    player_winner = DB.session.query(Players.Player).filter(Players.Player.username == winner[0]['username']).first()
+    player_winner.score += 1
+    DB.session.commit()
+    player_loser = DB.session.query(Players.Player).filter(Players.Player.username == loser[0]['username']).first()
+    player_loser.score -= 1
+    DB.session.commit()
+    #print(playerWinner)
+    #winner_score = player_winner.score
+    #loserScore = playerLoser.score
+    #print(winner_score)
 
 #Replay
 @SOCKETIO.on("replay")

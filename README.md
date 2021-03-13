@@ -51,8 +51,3 @@
 1. I had an issue where the sockets would fire several times, which made the console messy and slowed the performance of the app. So I used `socket.off('MY_EVENT', doThisOnlyOnce).on('MY_EVENT', doThisOnlyOnce);` to make certain sockets send one time. (https://dev.to/bravemaster619/how-to-prevent-multiple-socket-connections-and-events-in-react-531d)
 2. Disconnecting players broke the application when deployed on to Heroku because many players were left with an inaccessible board until the server would reset on its own. I fixed this by creating a sequence of socket emits and functions that would give existing players an option to fill in the empty spots.
 3. Even though it is still a problem of taking too long, before the time to notice that a player disconnected was 20+ seconds. I dramatically shortened this time by adding a ping interval of 1 second. It still takes 5+ seconds but that is more reasonable. (https://flask-socketio.readthedocs.io/en/latest/)
-
-## Test Functions (Enter these into terminal to do testcases)
-1. `python on_replay_test.py OnReplayTestCase.test_on_replay` - Tests on_replay function
-2. `python on_player_joined_test.py PlayerJoinedTestCase.test_player_joined` - Tests on_player_joined function
-3. `python add_username_test.py` - Mock tests add_username function and inserting a username in the database

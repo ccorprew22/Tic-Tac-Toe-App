@@ -1,7 +1,7 @@
 """
-    add_username_test.py
+    score_update_test.py
 
-    Tests to see if add_username adds new users and notices existing users.
+    Tests to see if score is update properly for both users.
 """
 
 import unittest
@@ -11,7 +11,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath('../../'))
-from app import add_username
+from app import score_update
 #import Players
 
 KEY_INPUT = "input"
@@ -20,7 +20,7 @@ KEY_EXPECTED = "expected"
 INITIAL_USERNAME = 'person1'
 
 
-class AddUsernameTestCase(unittest.TestCase):
+class ScoreUpdateTestCase(unittest.TestCase):
     """
     Add usernme test class
     """
@@ -30,18 +30,7 @@ class AddUsernameTestCase(unittest.TestCase):
                 KEY_INPUT: 'person2A',
                 KEY_EXPECTED: "New User Added: person2A",
             },
-            {
-                KEY_INPUT: 'person1',
-                KEY_EXPECTED: "New User Added: person1",
-            },
-            {
-                KEY_INPUT: 'person2A',
-                KEY_EXPECTED: "Existing User: person2A",
-            },
-            {
-                KEY_INPUT: 'person4T',
-                KEY_EXPECTED: "New User Added: person4T",
-            }
+            
         ]
 
         #initial_person = Players.Player(username=INITIAL_USERNAME, score=100)
