@@ -254,11 +254,8 @@ def score_update(champ, X, O): #all sids
         Players.Player.username == loser[0]['username']).first()
     player_loser.score -= 1
     DB.session.commit()
-    #print(playerWinner)
-    #winner_score = player_winner.score
-    #loserScore = playerLoser.score
-    #print(winner_score)
-
+    return [player_winner.score, player_loser.score]
+    
 
 #Replay
 @SOCKETIO.on("replay")

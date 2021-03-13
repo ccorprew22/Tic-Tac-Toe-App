@@ -22,7 +22,7 @@ INITIAL_USERNAME = 'person1'
 
 class AddUsernameTestCase(unittest.TestCase):
     """
-    Add usernme test class
+    Add username test class
     """
     def setUp(self):
         self.success_test_params = [
