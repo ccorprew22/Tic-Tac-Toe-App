@@ -70,7 +70,9 @@ def on_connect():
 # When a client disconnects from this Socket connection, this function is run
 @SOCKETIO.on('disconnect')
 def on_disconnect():
-    """Handles removing player from player lists after disconnecting"""
+    """
+    Handles removing player from player lists after disconnecting
+    """
     #global OVERALL_LST
     #global TWO_PLAYER
     #global DISPLAY_LST

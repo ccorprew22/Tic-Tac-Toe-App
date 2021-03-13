@@ -1,7 +1,7 @@
 // import React from "react";
 import { useState } from 'react';
-import { socket } from "./App";
-import { Replay } from "./Replay";
+import { socket } from './App';
+import { Replay } from './Replay';
 
 export function Display() {
   // const sId = socket.id;
@@ -13,7 +13,13 @@ export function Display() {
   // var display;
   let display = (
     <h1 className="text-center display">
-      X: {playerX} vs O: {playerO}
+      X:
+      {' '}
+      {playerX}
+      {' '}
+      vs O:
+      {' '}
+      {playerO}
     </h1>
   );
 
@@ -27,46 +33,44 @@ export function Display() {
         for (let i = 0; i < data.players.length; i++) {
           // Attempting to fill in page for late players after a disconnect
           if (
-            data.two_players[0] !== 'Disconnected Player' &&
-            data.players[i].sid === data.two_players[0]
+            data.two_players[0] !== 'Disconnected Player'
+            && data.players[i].sid === data.two_players[0]
           ) {
             setX(
-              (prevX) =>
-                (prevX = [data.players[i].sid, data.players[i].username])
+              (prevX) => (prevX = [data.players[i].sid, data.players[i].username]),
             );
             setResult(
-              (prevResult) => (prevResult = 'Player Disconnect! Game Over')
+              (prevResult) => (prevResult = 'Player Disconnect! Game Over'),
             );
             break;
           } else if (
-            data.two_players[1] !== 'Disconnected Player' &&
-            data.players[i].sid === data.two_players[1]
+            data.two_players[1] !== 'Disconnected Player'
+            && data.players[i].sid === data.two_players[1]
           ) {
             setO(
-              (prevO) =>
-                (prevO = [data.players[i].sid, data.players[i].username])
+              (prevO) => (prevO = [data.players[i].sid, data.players[i].username]),
             );
             setResult(
-              (prevResult) => (prevResult = "Player Disconnect! Game Over")
+              (prevResult) => (prevResult = 'Player Disconnect! Game Over'),
             );
             break;
           } else {
             setResult(
-              (prevResult) => (prevResult = "Player Disconnect! Game Over")
+              (prevResult) => (prevResult = 'Player Disconnect! Game Over'),
             );
             break;
           }
         }
       } else if (playerX === 'X' && data.players.length === 1) {
         setX(
-          (prevX) => (prevX = [data.players[0].sid, data.players[0].username])
+          (prevX) => (prevX = [data.players[0].sid, data.players[0].username]),
         );
       } else if (playerO === 'O' && data.players.length >= 2) {
         setX(
-          (prevX) => (prevX = [data.players[0].sid, data.players[0].username])
+          (prevX) => (prevX = [data.players[0].sid, data.players[0].username]),
         );
         setO(
-          (prevO) => (prevO = [data.players[1].sid, data.players[1].username])
+          (prevO) => (prevO = [data.players[1].sid, data.players[1].username]),
         );
       }
       // setX(prevX => prevX = [data.sid , data.players[0].username]);
@@ -79,12 +83,12 @@ export function Display() {
     if (data !== undefined) {
       if (data.player_left === playerX[0]) {
         setResult(
-          (prevResult) => (prevResult = 'Player Disconnect! Game Over')
+          (prevResult) => (prevResult = 'Player Disconnect! Game Over'),
         ); // Game over due to X disconnect)
         setX((prevX) => (prevX = 'X'));
       } else if (data.player_left === playerO[0]) {
         setResult(
-          (prevResult) => (prevResult = 'Player Disconnect! Game Over')
+          (prevResult) => (prevResult = 'Player Disconnect! Game Over'),
         ); // Game over due to O disconnect)
         setX((prevX) => (prevX = 'O'));
         console.log('O left');
@@ -97,16 +101,16 @@ export function Display() {
     // console.log(data);
     if (data.winner === true) {
       // adjust to send winning player
-      var winner;
+      let winner;
       // console.log(winner);
       if (data.champ === data.X) {
         winner = playerX;
       } else {
         winner = playerO;
       }
-      setResult((prevResult) => (prevResult = 'Winner : ' + winner[1])); //Game over
+      setResult((prevResult) => (prevResult = `Winner : ${winner[1]}`)); // Game over
     } else {
-      setResult((prevResult) => (prevResult = 'Draw')); //Draw
+      setResult((prevResult) => (prevResult = 'Draw')); // Draw
     }
   });
 
@@ -141,7 +145,7 @@ export function Display() {
     }
   });
 
-  if (result === "Player Disconnect! Game Over") {
+  if (result === 'Player Disconnect! Game Over') {
     display = (
       <div className="">
         <h1 className="text-center display">{result}</h1>
@@ -156,10 +160,16 @@ export function Display() {
       </div>
     );
   } else if (result.length === 0) {
-    //socket.emit("restart")
+    // socket.emit("restart")
     display = (
       <h1 className="text-center display">
-        X: {playerX[1]} vs O: {playerO[1]}
+        X:
+        {' '}
+        {playerX[1]}
+        {' '}
+        vs O:
+        {' '}
+        {playerO[1]}
       </h1>
     );
   }

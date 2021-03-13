@@ -1,6 +1,7 @@
 // import React from 'react';
 import { useRef, useState } from 'react';
 import { socket } from './App';
+
 export function Login() {
   const inputRef = useRef(null); // Reference to <input> element
   // const [player_lst, addPlayer] = useState([]); //array of { sId: socket.id, username : username }
@@ -8,11 +9,11 @@ export function Login() {
   function inputUsername() {
     if (inputRef !== null) {
       const username = inputRef.current.value;
-      if(username.length === 0){
-        setError(prevError => prevError = <p className="error center">Input Box Cannot Be Empty</p>);
-      }else{
+      if (username.length === 0) {
+        setError((prevError) => prevError = <p className="error center">Input Box Cannot Be Empty</p>);
+      } else {
         socket.emit('remove_login', { sid: socket.id });
-        socket.emit('player_joined', { sid: socket.id, username: username });
+        socket.emit('player_joined', { sid: socket.id, username });
       }
     }
   }
@@ -36,7 +37,7 @@ export function Login() {
             </button>
           </div>
         </div>
-        
+
       </div>
       {error}
     </div>

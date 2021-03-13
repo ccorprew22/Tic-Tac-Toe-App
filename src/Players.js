@@ -1,10 +1,10 @@
 // import React from 'react';
-import { ListItem } from './ListItem';
 import { useState } from 'react';
+import { ListItem } from './ListItem';
 import { socket } from './App';
 
 export function Players(player) {
-  //Online players list
+  // Online players list
   const [player_lst, addPlayer] = useState([]);
   // const [twoPlayer, setPlayer] = useState();
 

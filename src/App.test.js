@@ -12,6 +12,4 @@ test('Error after empty input appears', () => {
   fireEvent.click(loginButtonElement);
   const error = screen.getByText('Input Box Cannot Be Empty');
   expect(error).toBeInTheDocument();
-  
 });
-
