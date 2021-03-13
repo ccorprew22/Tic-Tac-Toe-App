@@ -44,6 +44,7 @@
 3. If a player joins in the middle of a game, the game crashes once the game ends. Refreshing the lobby empty tends to fix the problem.
 4. I would like to implement a password function so that people can't just login as someone else.
 5. Sometimes a player may disconnect after replacing a disconnected player.
+6. Sometimes if a player joins after a few games, one of the names in the display will disappear until the next game.
 
 ## Technical issues and solutions
 1. I had an issue where the sockets would fire several times, which made the console messy and slowed the performance of the app. So I used `socket.off('MY_EVENT', doThisOnlyOnce).on('MY_EVENT', doThisOnlyOnce);` to make certain sockets send one time. (https://dev.to/bravemaster619/how-to-prevent-multiple-socket-connections-and-events-in-react-531d)
