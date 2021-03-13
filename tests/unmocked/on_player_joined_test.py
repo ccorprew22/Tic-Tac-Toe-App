@@ -21,39 +21,34 @@ class PlayerJoinedTestCase(unittest.TestCase):
     Player joined test case class.
     """
     def setUp(self):
-        self.success_test_params = [
-            {
-
-                DATA_INPUT: {
-                    'sid': "abcfwenrkl12",
-                    'username': "chris123",
-                    'num_players': 0,
-                    'two_players': [],
-                    'players': []
-                },
-                EXPECTED_OUTPUT: ["abcfwenrkl12", ""]
+        self.success_test_params = [{
+            DATA_INPUT: {
+                'sid': "abcfwenrkl12",
+                'username': "chris123",
+                'num_players': 0,
+                'two_players': [],
+                'players': []
             },
-            {
-                DATA_INPUT: {
-                    'sid': "beeber1e8332",
-                    'username': "bob123",
-                    'num_players': 1,
-                    'two_players': [],
-                    'players': []
-                },
-                EXPECTED_OUTPUT: ["abcfwenrkl12", "beeber1e8332"]
+            EXPECTED_OUTPUT: ["abcfwenrkl12", ""]
+        }, {
+            DATA_INPUT: {
+                'sid': "beeber1e8332",
+                'username': "bob123",
+                'num_players': 1,
+                'two_players': [],
+                'players': []
             },
-            {
-                DATA_INPUT: {
-                    'sid': "bumble2893",
-                    'username': "steve123",
-                    'num_players': 2,
-                    'two_players': [],
-                    'players': []
-                },
-                EXPECTED_OUTPUT: ["abcfwenrkl12", "beeber1e8332"]
-            }
-        ]
+            EXPECTED_OUTPUT: ["abcfwenrkl12", "beeber1e8332"]
+        }, {
+            DATA_INPUT: {
+                'sid': "bumble2893",
+                'username': "steve123",
+                'num_players': 2,
+                'two_players': [],
+                'players': []
+            },
+            EXPECTED_OUTPUT: ["abcfwenrkl12", "beeber1e8332"]
+        }]
 
     def test_player_joined(self):
         """

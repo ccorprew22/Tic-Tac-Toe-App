@@ -25,24 +25,19 @@ class AddUsernameTestCase(unittest.TestCase):
     Add username test class
     """
     def setUp(self):
-        self.success_test_params = [
-            {
-                KEY_INPUT: 'person2A',
-                KEY_EXPECTED: "New User Added: person2A",
-            },
-            {
-                KEY_INPUT: 'person1',
-                KEY_EXPECTED: "New User Added: person1",
-            },
-            {
-                KEY_INPUT: 'person2A',
-                KEY_EXPECTED: "Existing User: person2A",
-            },
-            {
-                KEY_INPUT: 'person4T',
-                KEY_EXPECTED: "New User Added: person4T",
-            }
-        ]
+        self.success_test_params = [{
+            KEY_INPUT: 'person2A',
+            KEY_EXPECTED: "New User Added: person2A",
+        }, {
+            KEY_INPUT: 'person1',
+            KEY_EXPECTED: "New User Added: person1",
+        }, {
+            KEY_INPUT: 'person2A',
+            KEY_EXPECTED: "Existing User: person2A",
+        }, {
+            KEY_INPUT: 'person4T',
+            KEY_EXPECTED: "New User Added: person4T",
+        }]
 
         #initial_person = Players.Player(username=INITIAL_USERNAME, score=100)
         self.initial_db_mock = []
