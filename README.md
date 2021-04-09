@@ -1,5 +1,8 @@
 # Tic Tac Toe 
 
+## Heroku Link
+https://glacial-bastion-23362.herokuapp.com/
+
 ## Requirements
 1. `npm install`
 2. `pip install -r requirements.txt`
